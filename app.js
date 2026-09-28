@@ -15,7 +15,7 @@ function hourLabel(h) { return `${String(h).padStart(2, '0')}:00`; }
 function hourRange(h) { return `${hourLabel(h)}–${hourLabel((h + 1) % 24)}`; }
 function rankClass(rank) { return rank < 8 ? 'green' : rank < 16 ? 'orange' : 'red'; }
 function rankEmoji(rank) { return rank < 8 ? '🟢' : rank < 16 ? '🟠' : '🔴'; }
-function escapeHtml(str='') { return String(str).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[ch])); }
+function escapeHtml(str='') { return String(str).replace(/[&<>'\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','\"':'&quot;'}[ch])); }
 
 function renderElectricity(data) {
   const hours = [...data.hours].sort((a,b) => a.hora - b.hora);
@@ -24,11 +24,20 @@ function renderElectricity(data) {
   const nowHour = madridHour();
   const current = hours.find(x => Number(x.hora) === nowHour) || hours[0];
   const currentRank = rankMap.get(current.hora) ?? 12;
+  const nextCheap = hours.find(x => Number(x.hora) > nowHour && (rankMap.get(x.hora) ?? 99) < 8);
+
   $('currentPrice').textContent = fmtPrice(current.pvpc);
   $('currentHour').textContent = hourRange(current.hora);
   $('currentDot').className = `dot ${rankClass(currentRank)}`;
-  $('cheapestHour').textContent = hourLabel(sorted[0].hora);
-  $('cheapestPrice').textContent = `${fmtPrice(sorted[0].pvpc)} €/kWh`;
+
+  if (nextCheap) {
+    $('nextCheapHour').textContent = hourLabel(nextCheap.hora);
+    $('nextCheapPrice').textContent = `${fmtPrice(nextCheap.pvpc)} €/kWh`;
+  } else {
+    $('nextCheapHour').textContent = '—';
+    $('nextCheapPrice').textContent = 'No quedan horas baratas hoy';
+  }
+
   $('top3').innerHTML = sorted.slice(0,3).map((x,i)=>`<div class="top-item"><span>${['1ª','2ª','3ª'][i]} mejor</span><strong>${hourLabel(x.hora)}</strong><span>${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
   $('hourlyList').innerHTML = hours.map(x => `<div class="price-row ${x.hora===nowHour?'current':''}"><span class="time">${hourLabel(x.hora)}</span><span>${rankEmoji(rankMap.get(x.hora))}</span><span class="price">${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
   $('rankingList').innerHTML = sorted.map((x,rank)=>`<div class="price-row ${x.hora===nowHour?'current':''}"><span class="time">${hourLabel(x.hora)}</span><span><span class="rank-dot ${rankClass(rank)}" style="display:inline-block;margin-right:8px"></span>${rank<8?'Barata':rank<16?'Media':'Cara'}</span><span class="price">${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
