@@ -20,7 +20,10 @@
         <h1>Tiempo</h1>
         <button id="placeBtn" class="place-btn" type="button"><span id="placeIcon">📍</span> <span id="placeName">Localizando…</span> <span class="chevron">⌄</span></button>
       </div>
-      <button id="refreshBtn" class="icon-btn" type="button" aria-label="Actualizar">↻</button>
+      <div class="top-actions">
+        <span id="lastUpdated" class="update-time">—</span>
+        <button id="refreshBtn" class="icon-btn" type="button" aria-label="Actualizar">↻</button>
+      </div>
     </header>
 
     <section id="searchPanel" class="search-panel hidden">
@@ -51,13 +54,12 @@
       </article>
 
       <article class="card">
-        <div class="section-head"><div><span class="card-label">PRÓXIMAS HORAS</span><h2>Hoy</h2></div></div>
+        <div class="section-head"><div><span class="card-label">PRÓXIMAS HORAS</span><h2>24 horas</h2></div></div>
         <div id="hourlyStrip" class="hourly-strip"></div>
 
         <div id="rainCard" class="rain-inline">
           <div class="section-head"><div><span class="card-label">LLUVIA</span><h2 id="rainHeadline">Calculando…</h2></div><span id="rainConfidence" class="confidence">—</span></div>
           <p id="rainDetail" class="subtle">—</p>
-          <div id="rainBars" class="rain-bars"></div>
         </div>
       </article>
 
@@ -71,7 +73,6 @@
 
     <footer>
       <button id="installBtn" class="install-btn" type="button">Añadir a pantalla de inicio</button>
-      <p id="lastUpdated" class="footer-note">—</p>
     </footer>
   </main>
 
