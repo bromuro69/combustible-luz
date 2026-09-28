@@ -80,10 +80,12 @@ function renderMain(data){
 
   const indexes=Array.from({length:24},(_,i)=>nowIndex+i).filter(i=>i<(h.time||[]).length);
   $('hourlyStrip').innerHTML=indexes.map((i,k)=>{
-    const [_,ic]=displayWx(h.weather_code[i],h.is_day?.[i],h.precipitation_probability?.[i],h.precipitation?.[i],h.cloud_cover?.[i]);
-    const mm=Number(h.precipitation?.[i])||0;
-    const rainAmount=mm>=0.1?`<span class="rain-mm">☔ ${fmt(mm,1)} mm</span>`:'';
-    return `<div class="hour-card ${k===0?'now':''}"><span class="time">${k===0?'Ahora':hourOf(h.time[i])}</span><div class="icon">${ic}</div><strong>${fmt(h.temperature_2m[i])}°</strong><span class="feels" title="Sensación térmica">🌡️ ${fmt(h.apparent_temperature?.[i])}°</span><span class="rain">💧 ${fmt(h.precipitation_probability[i])}%</span>${rainAmount}</div>`;
+    const probability=Number(h.precipitation_probability?.[i])||0;
+    const [_,ic]=displayWx(h.weather_code[i],h.is_day?.[i],probability,h.precipitation?.[i],h.cloud_cover?.[i]);
+    const rawMm=Number(h.precipitation?.[i]);
+    const mm=Number.isFinite(rawMm)?Math.max(0,rawMm):0;
+    const rainAmount=mm>0?`<span class="rain-mm">☔ ${fmt(mm,mm<0.1?2:1)} mm</span>`:'';
+    return `<div class="hour-card ${k===0?'now':''}"><span class="time">${k===0?'Ahora':hourOf(h.time[i])}</span><div class="icon">${ic}</div><strong>${fmt(h.temperature_2m[i])}°</strong><span class="feels" title="Sensación térmica">✋ ${fmt(h.apparent_temperature?.[i])}°</span><span class="rain">💧 ${fmt(probability)}%</span>${rainAmount}</div>`;
   }).join('');
 
   const d=data.daily||{};
@@ -99,16 +101,13 @@ function renderRain(data,nowIndex){
   const peak=Math.max(0,...probs);
   const first20=probs.findIndex(p=>p>=20);
   const first40=probs.findIndex(p=>p>=40);
-  const first70=probs.findIndex(p=>p>=70);
 
   if(peak<20){
     $('rainHeadline').textContent='Sin lluvia prevista en las próximas 24 h';
   }else if(peak<40){
     $('rainHeadline').textContent=`Baja posibilidad de lluvia desde las ${hourOf(times[first20])}`;
-  }else if(peak<70){
-    $('rainHeadline').textContent=`Posible lluvia desde las ${hourOf(times[first40])}`;
   }else{
-    $('rainHeadline').textContent=`Lluvia probable desde las ${hourOf(times[first70])}`;
+    $('rainHeadline').textContent=`Lluvia probable desde las ${hourOf(times[first40])}`;
   }
   $('rainDetail').textContent=`Probabilidad máxima aproximada: ${fmt(peak)} %.`;
 }
