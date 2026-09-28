@@ -7,13 +7,15 @@ function madridHour() {
   const parts = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', hour12: false }).formatToParts(new Date());
   return Number(parts.find(p => p.type === 'hour')?.value ?? new Date().getHours()) % 24;
 }
-function fmtPrice(n) { return Number.isFinite(Number(n)) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 5, maximumFractionDigits: 5 }) : '—'; }
-function fmtFuel(n) { return Number.isFinite(Number(n)) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '—'; }
+function hasNumber(n) { return n !== null && n !== undefined && n !== '' && Number.isFinite(Number(n)); }
+function fmtPrice(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 5, maximumFractionDigits: 5 }) : '—'; }
+function fmtFuel(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '—'; }
+function fmtMoney(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'; }
 function hourLabel(h) { return `${String(h).padStart(2, '0')}:00`; }
 function hourRange(h) { return `${hourLabel(h)}–${hourLabel((h + 1) % 24)}`; }
 function rankClass(rank) { return rank < 8 ? 'green' : rank < 16 ? 'orange' : 'red'; }
 function rankEmoji(rank) { return rank < 8 ? '🟢' : rank < 16 ? '🟠' : '🔴'; }
-function escapeHtml(str='') { return String(str).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[ch])); }
+function escapeHtml(str='') { return String(str).replace(/[&<>'\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','\"':'&quot;'}[ch])); }
 
 function renderElectricity(data) {
   const hours = [...data.hours].sort((a,b) => a.hora - b.hora);
@@ -36,9 +38,28 @@ function renderElectricity(data) {
 
 function renderFuel(data) {
   const easy = data.easygas || {};
-  $('easygasGrid').innerHTML = ['g95','g98','diesel'].map(key=>`<div class="fuel-price"><span class="name">${PRODUCT_NAMES[key]}</span><strong>${fmtFuel(easy[key]?.price)} <small>€/l</small></strong></div>`).join('');
+  $('easygasGrid').innerHTML = ['g95','g98','diesel'].map(key => {
+    const price = easy[key]?.price;
+    const priceHtml = hasNumber(price)
+      ? `<strong>${fmtFuel(price)} <small>€/l</small></strong>`
+      : `<strong class="no-price">Sin precio comunicado</strong>`;
+    return `<div class="fuel-price"><span class="name">${PRODUCT_NAMES[key]}</span>${priceHtml}</div>`;
+  }).join('');
+
   $('easygasUpdated').textContent = data.updatedLabel || 'Actualizado';
-  $('cheapestFuel').innerHTML = ['g95','g98','diesel'].map(key=>{ const s=data.cheapest?.[key]; if(!s) return `<div class="station-card"><div class="station-top"><span>${PRODUCT_NAMES[key]}</span><strong>—</strong></div><p>Sin dato disponible</p></div>`; return `<div class="station-card"><div class="station-top"><span>${PRODUCT_NAMES[key]}</span><strong>${fmtFuel(s.price)} €/l</strong></div><h3>${escapeHtml(s.brand||'Estación de servicio')}</h3><p>${escapeHtml(s.address||'Gijón')}</p></div>`; }).join('');
+
+  $('cheapestFuel').innerHTML = ['g95','g98','diesel'].map(key => {
+    const s = data.cheapest?.[key];
+    if (!s) return `<div class="station-card"><div class="station-top"><span>${PRODUCT_NAMES[key]}</span><strong>—</strong></div><p>Sin dato disponible</p></div>`;
+
+    const easyPrice = easy[key]?.price;
+    const savingPerLitre = hasNumber(easyPrice) && hasNumber(s.price) ? Number(easyPrice) - Number(s.price) : 0;
+    const savingHtml = savingPerLitre > 0.0005
+      ? `<div class="saving"><span>Ahorras frente a EasyGas</span><strong>${fmtFuel(savingPerLitre)} €/l · ${fmtMoney(savingPerLitre * 50)} € en 50 L</strong></div>`
+      : '';
+
+    return `<div class="station-card"><div class="station-top"><span>${PRODUCT_NAMES[key]}</span><strong>${fmtFuel(s.price)} €/l</strong></div><h3>${escapeHtml(s.brand||'Estación de servicio')}</h3><p>${escapeHtml(s.address||'Gijón')}</p>${savingHtml}</div>`;
+  }).join('');
 }
 
 async function loadData(force=false) {
