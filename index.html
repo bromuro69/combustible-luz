@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Combustible · Luz" />
+  <title>Combustible · Luz</title>
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/icon.svg" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">DATOS EN TIEMPO REAL</p>
+        <h1>Combustible · Luz</h1>
+        <p id="lastUpdated" class="subtle">Cargando…</p>
+      </div>
+      <button id="refreshBtn" class="icon-btn" type="button" aria-label="Actualizar" title="Actualizar">↻</button>
+    </header>
+
+    <nav class="tabs" aria-label="Secciones">
+      <button class="tab active" type="button" data-tab="electricity">⚡ Luz</button>
+      <button class="tab" type="button" data-tab="fuel">⛽ Combustible</button>
+    </nav>
+
+    <section id="status" class="status hidden" role="status"></section>
+
+    <section id="electricity" class="panel active" aria-labelledby="tab-electricity">
+      <div class="hero-grid">
+        <article class="card hero-card">
+          <span class="card-label">AHORA</span>
+          <div class="hero-value-row">
+            <span id="currentDot" class="dot"></span>
+            <strong id="currentPrice" class="hero-value">—</strong>
+            <span class="unit">€/kWh</span>
+          </div>
+          <p id="currentHour" class="subtle">—</p>
+        </article>
+
+        <article class="card hero-card">
+          <span class="card-label">MÁS BARATA</span>
+          <strong id="cheapestHour" class="hero-value">—</strong>
+          <p id="cheapestPrice" class="subtle">—</p>
+        </article>
+      </div>
+
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <span class="card-label">TOP 3 DE HOY</span>
+            <h2>Mejores horas</h2>
+          </div>
+        </div>
+        <div id="top3" class="top3"></div>
+      </article>
+
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <span class="card-label">ORDEN HORARIO</span>
+            <h2>Precio por hora</h2>
+          </div>
+        </div>
+        <div id="hourlyChart" class="mini-chart" aria-label="Gráfico horario de precio"></div>
+        <div id="hourlyList" class="price-list"></div>
+      </article>
+
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <span class="card-label">DE MENOR A MAYOR</span>
+            <h2>Las 24 horas</h2>
+          </div>
+          <div class="legend" aria-label="Leyenda de precios">
+            <span>🟢 8 baratas</span><span>🟠 8 medias</span><span>🔴 8 caras</span>
+          </div>
+        </div>
+        <div id="rankingList" class="price-list"></div>
+      </article>
+
+      <p class="source-note">PVPC: datos de PreciLuz a partir de Red Eléctrica de España (REE/ESIOS). El precio mostrado corresponde al término horario de energía; la factura final puede incluir otros conceptos e impuestos.</p>
+    </section>
+
+    <section id="fuel" class="panel" aria-labelledby="tab-fuel">
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <span class="card-label">EASYGAS · ROCES</span>
+            <h2>Precios de referencia</h2>
+          </div>
+          <span id="easygasUpdated" class="badge">—</span>
+        </div>
+        <div id="easygasGrid" class="fuel-grid"></div>
+      </article>
+
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <span class="card-label">MÁS BARATO EN GIJÓN</span>
+            <h2>Mejor precio por combustible</h2>
+          </div>
+        </div>
+        <div id="cheapestFuel" class="fuel-stack"></div>
+      </article>
+
+      <p class="source-note">Combustible: Geoportal de precios de carburantes del Ministerio para la Transición Ecológica / servicio REST oficial. Los precios los comunican las estaciones de servicio.</p>
+    </section>
+
+    <footer>
+      <button id="installBtn" class="install-btn" type="button">Añadir a pantalla de inicio</button>
+      <p class="footer-note">Diseñada como PWA: funciona en iPhone, Android, iPad, Mac y PC.</p>
+    </footer>
+  </main>
+
+  <dialog id="iosInstallDialog">
+    <h3>Instalar en iPhone o iPad</h3>
+    <p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p>
+    <button id="closeDialog" type="button">Entendido</button>
+  </dialog>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
