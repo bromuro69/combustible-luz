@@ -1,132 +1,109 @@
 const $ = (id) => document.getElementById(id);
 let deferredPrompt = null;
+let searchTimer = null;
+let currentPlace = null;
 
-const PRODUCT_NAMES = { g95: 'Gasolina 95', g98: 'Gasolina 98', diesel: 'Gasóleo A' };
+const GIJON = { name:'Gijón', admin1:'Asturias', country:'España', latitude:43.5322, longitude:-5.6611, timezone:'Europe/Madrid', manual:true };
+const API = 'https://api.open-meteo.com/v1';
+const GEO = 'https://geocoding-api.open-meteo.com/v1/search';
 
-function madridHour() {
-  const parts = new Intl.DateTimeFormat('es-ES', { timeZone: 'Europe/Madrid', hour: '2-digit', hour12: false }).formatToParts(new Date());
-  return Number(parts.find(p => p.type === 'hour')?.value ?? new Date().getHours()) % 24;
+const weatherMap = {
+  0:['Despejado','☀️'],1:['Casi despejado','🌤️'],2:['Parcialmente nuboso','⛅️'],3:['Nublado','☁️'],
+  45:['Niebla','🌫️'],48:['Niebla','🌫️'],51:['Llovizna débil','🌦️'],53:['Llovizna','🌦️'],55:['Llovizna intensa','🌧️'],
+  56:['Llovizna helada','🌧️'],57:['Llovizna helada','🌧️'],61:['Lluvia débil','🌦️'],63:['Lluvia','🌧️'],65:['Lluvia intensa','🌧️'],
+  66:['Lluvia helada','🌧️'],67:['Lluvia helada','🌧️'],71:['Nieve débil','🌨️'],73:['Nieve','🌨️'],75:['Nieve intensa','❄️'],77:['Granizo de nieve','🌨️'],
+  80:['Chubascos débiles','🌦️'],81:['Chubascos','🌧️'],82:['Chubascos fuertes','⛈️'],85:['Chubascos de nieve','🌨️'],86:['Nieve intensa','❄️'],
+  95:['Tormenta','⛈️'],96:['Tormenta con granizo','⛈️'],99:['Tormenta fuerte','⛈️']
+};
+
+function wx(code, isDay=1){
+  const item = weatherMap[Number(code)] || ['Variable','☁️'];
+  if(Number(code)===0 && !Number(isDay)) return ['Despejado','🌙'];
+  if(Number(code)===1 && !Number(isDay)) return ['Poco nuboso','🌙'];
+  return item;
 }
-function hasNumber(n) { return n !== null && n !== undefined && n !== '' && Number.isFinite(Number(n)); }
-function fmtPrice(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 5, maximumFractionDigits: 5 }) : '—'; }
-function fmtFuel(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '—'; }
-function fmtMoney(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'; }
-function fmtGasVariable(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : '—'; }
-function hourLabel(h) { return `${String(h).padStart(2, '0')}:00`; }
-function hourRange(h) { return `${hourLabel(h)}–${hourLabel((h + 1) % 24)}`; }
-function rankClass(rank) { return rank < 8 ? 'green' : rank < 16 ? 'orange' : 'red'; }
-function rankEmoji(rank) { return rank < 8 ? '🟢' : rank < 16 ? '🟠' : '🔴'; }
-function escapeHtml(str='') { return String(str).replace(/[&<>'\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','\"':'&quot;'}[ch])); }
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function fmt(n,d=0){return Number.isFinite(Number(n))?Number(n).toLocaleString('es-ES',{maximumFractionDigits:d,minimumFractionDigits:d}):'—';}
+function hourOf(iso){return iso?.slice(11,16)||'—';}
+function dayName(iso,i){if(i===0)return'Hoy';if(i===1)return'Mañana';return new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(new Date(`${iso}T12:00:00`)).replace('.','').replace(/^./,c=>c.toUpperCase());}
+function saveRecent(place){ if(!place?.manual)return; const old=JSON.parse(localStorage.getItem('weatherRecents')||'[]'); const next=[place,...old.filter(x=>!(x.name===place.name&&x.admin1===place.admin1))].slice(0,5); localStorage.setItem('weatherRecents',JSON.stringify(next)); renderRecents(); }
+function renderRecents(){const list=JSON.parse(localStorage.getItem('weatherRecents')||'[]');$('recentWrap').classList.toggle('hidden',!list.length);$('recentList').innerHTML=list.map((p,i)=>`<button class="recent-item" data-recent="${i}">🕘 <span><strong>${esc(p.name)}</strong><small>${esc([p.admin1,p.country].filter(Boolean).join(', '))}</small></span></button>`).join('');document.querySelectorAll('[data-recent]').forEach(b=>b.onclick=()=>selectPlace(list[Number(b.dataset.recent)]));}
 
-function renderElectricity(data) {
-  const hours = [...data.hours].sort((a,b) => a.hora - b.hora);
-  const sorted = [...hours].sort((a,b) => a.pvpc - b.pvpc);
-  const rankMap = new Map(sorted.map((x, i) => [x.hora, i]));
-  const nowHour = madridHour();
-  const current = hours.find(x => Number(x.hora) === nowHour) || hours[0];
-  const currentRank = rankMap.get(current.hora) ?? 12;
-  const nextCheap = hours.find(x => Number(x.hora) > nowHour && (rankMap.get(x.hora) ?? 99) < 8);
+function setStatus(text=''){ $('status').textContent=text; $('status').classList.toggle('hidden',!text); }
+function setLoading(on){$('refreshBtn').classList.toggle('loading',on);$('refreshBtn').disabled=on;}
+function placeLabel(p){return p?.name || 'Mi ubicación';}
+function selectPlace(place){ currentPlace={...place}; $('placeIcon').textContent=place.manual?'🔎':'📍'; $('placeName').textContent=placeLabel(place); $('searchPanel').classList.add('hidden'); $('searchInput').value=''; $('searchResults').innerHTML=''; saveRecent(place); loadWeather(place); }
 
-  $('currentPrice').textContent = fmtPrice(current.pvpc);
-  $('currentHour').textContent = hourRange(current.hora);
-  $('currentDot').className = `dot ${rankClass(currentRank)}`;
-
-  if (nextCheap) {
-    $('nextCheapHour').textContent = hourLabel(nextCheap.hora);
-    $('nextCheapPrice').textContent = `${fmtPrice(nextCheap.pvpc)} €/kWh`;
-  } else {
-    $('nextCheapHour').textContent = '—';
-    $('nextCheapPrice').textContent = 'No quedan horas baratas hoy';
-  }
-
-  $('top3').innerHTML = sorted.slice(0,3).map((x,i)=>`<div class="top-item"><span>${['1ª','2ª','3ª'][i]} mejor</span><strong>${hourLabel(x.hora)}</strong><span>${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
-  $('hourlyList').innerHTML = hours.map(x => `<div class="price-row ${x.hora===nowHour?'current':''}"><span class="time">${hourLabel(x.hora)}</span><span>${rankEmoji(rankMap.get(x.hora))}</span><span class="price">${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
-  $('rankingList').innerHTML = sorted.map((x,rank)=>`<div class="price-row ${x.hora===nowHour?'current':''}"><span class="time">${hourLabel(x.hora)}</span><span><span class="rank-dot ${rankClass(rank)}" style="display:inline-block;margin-right:8px"></span>${rank<8?'Barata':rank<16?'Media':'Cara'}</span><span class="price">${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
-  const vals = hours.map(x=>Number(x.pvpc)); const min=Math.min(...vals), max=Math.max(...vals), span=Math.max(max-min,.001);
-  $('hourlyChart').innerHTML = hours.map(x=>{ const rank=rankMap.get(x.hora); const pct=18+((Number(x.pvpc)-min)/span)*82; return `<div class="chart-bar ${rankClass(rank)} ${x.hora===nowHour?'current':''}" style="height:${pct}%" title="${hourLabel(x.hora)} · ${fmtPrice(x.pvpc)} €/kWh"></div>`; }).join('');
+async function getForecast(place){
+  const q=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'auto',forecast_days:'7',current:'temperature_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,precipitation',hourly:'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,is_day,wind_speed_10m',daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum'});
+  const r=await fetch(`${API}/forecast?${q}`); if(!r.ok)throw new Error('No se pudo obtener la previsión'); return r.json();
+}
+async function getModel(endpoint,place){
+  const q=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'auto',forecast_days:'2',current:'temperature_2m,weather_code',hourly:'temperature_2m,precipitation'});
+  const r=await fetch(`${API}/${endpoint}?${q}`); if(!r.ok)throw new Error(endpoint); return r.json();
 }
 
-function renderFuel(data) {
-  const easy = data.easygas || {};
-  $('easygasGrid').innerHTML = ['g95','g98','diesel'].map(key => {
-    const price = easy[key]?.price;
-    const priceHtml = hasNumber(price)
-      ? `<strong>${fmtFuel(price)} <small>€/l</small></strong>`
-      : `<strong class="no-price">Sin precio comunicado</strong>`;
-    return `<div class="fuel-price"><span class="name">${PRODUCT_NAMES[key]}</span>${priceHtml}</div>`;
-  }).join('');
+function renderMain(data){
+  const c=data.current||{}; const [text,icon]=wx(c.weather_code,c.is_day);
+  $('currentTemp').textContent=fmt(c.temperature_2m); $('currentText').textContent=text; $('currentIcon').textContent=icon;
+  $('feelsLike').textContent=`Sensación ${fmt(c.apparent_temperature)}°`;
+  $('currentRain').textContent=`${fmt(c.precipitation,1)} mm`; $('currentWind').textContent=`${fmt(c.wind_speed_10m)} km/h`; $('currentCloud').textContent=`${fmt(c.cloud_cover)} %`;
 
-  $('easygasUpdated').textContent = data.updatedLabel || 'Actualizado';
+  const h=data.hourly||{}; const nowIndex=Math.max(0,(h.time||[]).findIndex(t=>t>=data.current?.time));
+  const indexes=Array.from({length:12},(_,i)=>nowIndex+i).filter(i=>i<(h.time||[]).length);
+  $('hourlyStrip').innerHTML=indexes.map((i,k)=>{const [_,ic]=wx(h.weather_code[i],h.is_day?.[i]);return `<div class="hour-card ${k===0?'now':''}"><span class="time">${k===0?'Ahora':hourOf(h.time[i])}</span><div class="icon">${ic}</div><strong>${fmt(h.temperature_2m[i])}°</strong><span class="rain">💧 ${fmt(h.precipitation_probability[i])}%</span></div>`}).join('');
 
-  $('cheapestFuel').innerHTML = ['g95','g98','diesel'].map(key => {
-    const s = data.cheapest?.[key];
-    if (!s) return `<div class="station-card"><div class="station-top"><span>${PRODUCT_NAMES[key]}</span><strong>—</strong></div><p>Sin dato disponible</p></div>`;
-
-    const easyPrice = easy[key]?.price;
-    const savingPerLitre = hasNumber(easyPrice) && hasNumber(s.price) ? Number(easyPrice) - Number(s.price) : 0;
-    const savingHtml = savingPerLitre > 0.0005
-      ? `<div class="saving"><span>Ahorras frente a EasyGas</span><strong>${fmtFuel(savingPerLitre)} €/l · ${fmtMoney(savingPerLitre * 50)} € en 50 L</strong></div>`
-      : '';
-
-    return `<div class="station-card"><div class="station-top"><span>${PRODUCT_NAMES[key]}</span><strong>${fmtFuel(s.price)} €/l</strong></div><h3>${escapeHtml(s.brand||'Estación de servicio')}</h3><p>${escapeHtml(s.address||'Gijón')}</p>${savingHtml}</div>`;
-  }).join('');
+  const d=data.daily||{};
+  $('dailyList').innerHTML=(d.time||[]).map((date,i)=>{const [_,ic]=wx(d.weather_code[i],1);return `<div class="day-row"><span class="day">${dayName(date,i)}</span><span>${ic}</span><span class="rain">💧 ${fmt(d.precipitation_probability_max[i])}% · ${fmt(d.precipitation_sum[i],1)} mm</span><span class="temps"><strong>${fmt(d.temperature_2m_max[i])}°</strong> <span class="min">${fmt(d.temperature_2m_min[i])}°</span></span></div>`}).join('');
+  renderRain(data,nowIndex);
 }
 
-function renderGas(data) {
-  const tariffs = Array.isArray(data.tariffs) ? data.tariffs : [];
-  $('gasPeriod').textContent = data.periodLabel || 'Tarifa vigente';
-  $('gasGrid').innerHTML = tariffs.map(t => `
-    <article class="gas-card">
-      <div class="gas-card-head">
-        <div>
-          <span class="card-label">${escapeHtml(t.id)}</span>
-          <h3>${escapeHtml(t.consumption)}</h3>
-        </div>
-      </div>
-      <div class="gas-main-price">
-        <strong>${fmtGasVariable(t.variablePerKwh)}</strong>
-        <span>€/kWh</span>
-      </div>
-      <p class="gas-caption">Término variable</p>
-      <div class="gas-fixed"><span>Fijo mensual</span><strong>${fmtMoney(t.fixedMonthly)} €/mes</strong></div>
-    </article>`).join('');
-
-  const notice = $('gasNotice');
-  if (data.validUntil) {
-    const expires = new Date(`${data.validUntil}T23:59:59+02:00`).getTime();
-    const expired = Number.isFinite(expires) && Date.now() > expires;
-    notice.classList.toggle('hidden', !expired);
-    if (expired) notice.textContent = 'Esta TUR ha terminado su periodo de vigencia. Estamos pendientes de cargar la siguiente tarifa oficial publicada en el BOE.';
-  } else {
-    notice.classList.add('hidden');
-  }
-
-  const sourceLink = $('gasSourceLink');
-  if (data.sourceUrl) {
-    sourceLink.href = data.sourceUrl;
-    sourceLink.classList.remove('hidden');
-  } else {
-    sourceLink.classList.add('hidden');
-  }
+function renderRain(data,nowIndex){
+  const h=data.hourly||{}; const end=Math.min(nowIndex+12,(h.time||[]).length); const probs=(h.precipitation_probability||[]).slice(nowIndex,end); const prec=(h.precipitation||[]).slice(nowIndex,end); const times=(h.time||[]).slice(nowIndex,end);
+  const first=probs.findIndex((p,i)=>Number(p)>=40||Number(prec[i])>=0.2); const peak=Math.max(0,...probs.map(Number));
+  if(first<0){$('rainHeadline').textContent='Sin lluvia relevante en las próximas horas';$('rainDetail').textContent='No aparece precipitación significativa en el corto plazo.';}
+  else{$('rainHeadline').textContent=`Posible lluvia desde las ${hourOf(times[first])}`;$('rainDetail').textContent=`Probabilidad máxima aproximada: ${fmt(peak)} %.`;}
+  $('rainBars').innerHTML=probs.map((p,i)=>`<div class="rain-col"><div class="rain-bar" style="height:${Math.max(3,Number(p)*.62)}px;opacity:${.35+Number(p)/160}"></div><small>${hourOf(times[i]).slice(0,2)}</small></div>`).join('');
 }
 
-async function loadData(force=false) {
-  $('status').classList.add('hidden'); $('refreshBtn').classList.add('loading'); $('refreshBtn').disabled=true;
-  try {
-    const res = await fetch(`/api/dashboard${force?`?t=${Date.now()}`:''}`, { cache: force ? 'no-store' : 'default' });
-    if (!res.ok) throw new Error(`Error ${res.status}`);
-    const payload = await res.json();
-    if (!payload.electricity?.hours?.length) throw new Error('No se recibieron precios de electricidad.');
-    renderFuel(payload.fuel||{}); renderElectricity(payload.electricity); renderGas(payload.gas||{});
-    const ts=new Date(payload.generatedAt||Date.now()); $('lastUpdated').textContent=`Actualizado ${ts.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
-  } catch(err) { $('status').textContent=`No se pudieron actualizar los datos: ${err.message}`; $('status').classList.remove('hidden'); }
-  finally { $('refreshBtn').classList.remove('loading'); $('refreshBtn').disabled=false; }
+function consensus(models,data){
+  const ok=models.filter(x=>x.status==='fulfilled').map(x=>x.value); const names=['ECMWF','ICON','GFS'];
+  $('modelGrid').innerHTML=models.map((m,i)=>m.status==='fulfilled'?`<div class="model"><span>${names[i]}</span><strong>${fmt(m.value.current?.temperature_2m)}° · ${wx(m.value.current?.weather_code)[0]}</strong></div>`:`<div class="model"><span>${names[i]}</span><strong>Sin dato</strong></div>`).join('');
+  if(ok.length<2){setConfidence('medium','MEDIA');$('consensusText').textContent='No hemos podido comparar suficientes modelos en esta actualización.';return;}
+  const temps=ok.map(m=>Number(m.current?.temperature_2m)).filter(Number.isFinite); const tempSpread=Math.max(...temps)-Math.min(...temps);
+  const sums=ok.map(m=>(m.hourly?.precipitation||[]).slice(0,12).reduce((a,b)=>a+(Number(b)||0),0)); const rainSpread=Math.max(...sums)-Math.min(...sums); const rainy=sums.filter(v=>v>=0.5).length;
+  let level='high',label='ALTA'; if(tempSpread>3||rainSpread>4||(rainy>0&&rainy<ok.length)){level='medium';label='MEDIA';} if(tempSpread>5||rainSpread>8){level='low';label='BAJA';}
+  setConfidence(level,label); $('consensusText').textContent=level==='high'?'Los principales modelos coinciden bastante en el corto plazo.':level==='medium'?'Hay algunas diferencias entre modelos; conviene revisar las próximas actualizaciones.':'Los modelos discrepan de forma notable. La previsión tiene más incertidumbre de lo normal.';
+  $('rainConfidence').className=`confidence ${level}`;$('rainConfidence').textContent=`Confianza ${label.toLowerCase()}`;
+}
+function setConfidence(level,label){$('consensusBadge').className=`confidence ${level}`;$('consensusBadge').textContent=label;}
+
+async function loadWeather(place=currentPlace){
+  if(!place)return; setLoading(true); setStatus(''); $('weatherContent').classList.remove('hidden');
+  try{
+    const main=await getForecast(place); renderMain(main);
+    const models=await Promise.allSettled(['ecmwf','dwd-icon','gfs'].map(e=>getModel(e,place))); consensus(models,main);
+    $('lastUpdated').textContent=`Actualizado ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
+  }catch(e){setStatus(`No se pudo actualizar el tiempo: ${e.message}`);}finally{setLoading(false);}
 }
 
-document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn)); document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===btn.dataset.tab)); }));
-$('refreshBtn').addEventListener('click',()=>loadData(true));
-window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;});
-$('installBtn').addEventListener('click',async()=>{ if(deferredPrompt){deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; return;} if(/iPhone|iPad|iPod/i.test(navigator.userAgent)) $('iosInstallDialog').showModal(); else alert('Abre el menú del navegador y selecciona “Instalar aplicación” o “Añadir a pantalla de inicio”.'); });
-$('closeDialog').addEventListener('click',()=>$('iosInstallDialog').close());
-if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
-loadData(); setInterval(()=>loadData(false),5*60*1000);
+function locate(){
+  setStatus(''); $('placeIcon').textContent='📍'; $('placeName').textContent='Localizando…';
+  if(!navigator.geolocation){selectPlace(GIJON);setStatus('Este navegador no permite geolocalización. Mostramos Gijón.');return;}
+  navigator.geolocation.getCurrentPosition(pos=>selectPlace({name:'Mi ubicación',latitude:pos.coords.latitude,longitude:pos.coords.longitude,manual:false}),()=>{selectPlace(GIJON);setStatus('No pudimos acceder a tu ubicación. Mostramos Gijón; puedes buscar otro lugar arriba.');},{enableHighAccuracy:false,timeout:7000,maximumAge:10*60*1000});
+}
+
+async function searchPlaces(q){
+  if(q.trim().length<2){$('searchResults').innerHTML='';return;}
+  try{const u=new URL(GEO);u.searchParams.set('name',q.trim());u.searchParams.set('count','6');u.searchParams.set('language','es');const r=await fetch(u);const j=await r.json();const rs=j.results||[];$('searchResults').innerHTML=rs.map((p,i)=>`<button class="search-result" data-result="${i}">📌 <span><strong>${esc(p.name)}</strong><small>${esc([p.admin1,p.country].filter(Boolean).join(', '))}</small></span></button>`).join('')||'<p class="subtle" style="padding:10px">No encontramos ese lugar.</p>';document.querySelectorAll('[data-result]').forEach(b=>b.onclick=()=>{const p=rs[Number(b.dataset.result)];selectPlace({...p,manual:true});});}catch{$('searchResults').innerHTML='<p class="subtle" style="padding:10px">No se pudo realizar la búsqueda.</p>';}
+}
+
+$('placeBtn').onclick=()=>{$('searchPanel').classList.toggle('hidden');if(!$('searchPanel').classList.contains('hidden')){renderRecents();setTimeout(()=>$('searchInput').focus(),50);}};
+$('searchInput').addEventListener('input',e=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>searchPlaces(e.target.value),260);});
+$('myLocationBtn').onclick=()=>{$('searchPanel').classList.add('hidden');locate();};
+$('refreshBtn').onclick=()=>loadWeather();
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+$('installBtn').onclick=async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;return;}if(/iPhone|iPad|iPod/i.test(navigator.userAgent))$('iosInstallDialog').showModal();else alert('Abre el menú del navegador y selecciona “Instalar aplicación” o “Añadir a pantalla de inicio”.');};
+$('closeDialog').onclick=()=>$('iosInstallDialog').close();
+if('serviceWorker'in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+renderRecents();locate();
