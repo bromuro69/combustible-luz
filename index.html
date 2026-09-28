@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#111827" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Combustible · Luz" />
-  <title>Combustible · Luz</title>
+  <meta name="apple-mobile-web-app-title" content="Energías" />
+  <title>Energías</title>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/icon.svg" />
   <link rel="stylesheet" href="/styles.css" />
@@ -16,21 +16,47 @@
   <main class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">DATOS EN TIEMPO REAL</p>
-        <h1>Combustible · Luz</h1>
+        <p class="eyebrow">PRECIOS DE ENERGÍA</p>
+        <h1>Energías</h1>
         <p id="lastUpdated" class="subtle">Cargando…</p>
       </div>
       <button id="refreshBtn" class="icon-btn" type="button" aria-label="Actualizar" title="Actualizar">↻</button>
     </header>
 
     <nav class="tabs" aria-label="Secciones">
-      <button class="tab active" type="button" data-tab="electricity">⚡ Luz</button>
-      <button class="tab" type="button" data-tab="fuel">⛽ Combustible</button>
+      <button class="tab active" type="button" data-tab="fuel">⛽ Combustible</button>
+      <button class="tab" type="button" data-tab="electricity">⚡ Luz</button>
+      <button class="tab" type="button" data-tab="gas">🔥 Gas</button>
     </nav>
 
     <section id="status" class="status hidden" role="status"></section>
 
-    <section id="electricity" class="panel active" aria-labelledby="tab-electricity">
+    <section id="fuel" class="panel active" aria-label="Combustible">
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <span class="card-label">EASYGAS · ROCES</span>
+            <h2>Precios de referencia</h2>
+          </div>
+          <span id="easygasUpdated" class="badge">—</span>
+        </div>
+        <div id="easygasGrid" class="fuel-grid"></div>
+      </article>
+
+      <article class="card">
+        <div class="section-head">
+          <div>
+            <span class="card-label">MÁS BARATO EN GIJÓN</span>
+            <h2>Mejor precio por combustible</h2>
+          </div>
+        </div>
+        <div id="cheapestFuel" class="fuel-stack"></div>
+      </article>
+
+      <p class="source-note">Combustible: Geoportal de precios de carburantes del Ministerio para la Transición Ecológica / servicio REST oficial. Los precios los comunican las estaciones de servicio.</p>
+    </section>
+
+    <section id="electricity" class="panel" aria-label="Luz">
       <div class="hero-grid">
         <article class="card hero-card">
           <span class="card-label">AHORA</span>
@@ -86,39 +112,37 @@
       <p class="source-note">PVPC: datos de PreciLuz a partir de Red Eléctrica de España (REE/ESIOS). El precio mostrado corresponde al término horario de energía; la factura final puede incluir otros conceptos e impuestos.</p>
     </section>
 
-    <section id="fuel" class="panel" aria-labelledby="tab-fuel">
+    <section id="gas" class="panel" aria-label="Gas natural">
       <article class="card">
         <div class="section-head">
           <div>
-            <span class="card-label">EASYGAS · ROCES</span>
-            <h2>Precios de referencia</h2>
+            <span class="card-label">GAS NATURAL REGULADO</span>
+            <h2>Tarifa de Último Recurso</h2>
           </div>
-          <span id="easygasUpdated" class="badge">—</span>
+          <span id="gasPeriod" class="badge">—</span>
         </div>
-        <div id="easygasGrid" class="fuel-grid"></div>
+        <div id="gasNotice" class="gas-notice hidden"></div>
+        <div id="gasGrid" class="gas-grid"></div>
       </article>
 
-      <article class="card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">MÁS BARATO EN GIJÓN</span>
-            <h2>Mejor precio por combustible</h2>
-          </div>
-        </div>
-        <div id="cheapestFuel" class="fuel-stack"></div>
+      <article class="card gas-help">
+        <span class="card-label">CÓMO LEERLO</span>
+        <h2>Tu TUR depende del consumo anual</h2>
+        <p><strong>TUR.1</strong> hasta 5.000 kWh/año · <strong>TUR.2</strong> de 5.000 a 15.000 · <strong>TUR.3</strong> de 15.000 a 50.000.</p>
+        <p>El término variable se aplica a cada kWh consumido y el término fijo se cobra cada mes.</p>
       </article>
 
-      <p class="source-note">Combustible: Geoportal de precios de carburantes del Ministerio para la Transición Ecológica / servicio REST oficial. Los precios los comunican las estaciones de servicio.</p>
+      <p class="source-note">Gas natural: TUR oficial publicada en el BOE. Los importes mostrados son los términos fijo y variable; la factura final puede incluir impuestos, alquiler de contador y otros conceptos. <a id="gasSourceLink" class="source-link hidden" href="#" target="_blank" rel="noopener noreferrer">Ver publicación oficial</a></p>
     </section>
 
     <footer>
       <button id="installBtn" class="install-btn" type="button">Añadir a pantalla de inicio</button>
-      <p class="footer-note">Diseñada como PWA: funciona en iPhone, Android, iPad, Mac y PC.</p>
+      <p class="footer-note">Energías funciona como PWA en iPhone, Android, iPad, Mac y PC.</p>
     </footer>
   </main>
 
   <dialog id="iosInstallDialog">
-    <h3>Instalar en iPhone o iPad</h3>
+    <h3>Instalar Energías en iPhone o iPad</h3>
     <p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p>
     <button id="closeDialog" type="button">Entendido</button>
   </dialog>
