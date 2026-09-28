@@ -51,6 +51,7 @@ function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt
 function fmt(n,d=0){return Number.isFinite(Number(n))?Number(n).toLocaleString('es-ES',{maximumFractionDigits:d,minimumFractionDigits:d}):'—';}
 function hourOf(iso){return iso?.slice(11,16)||'—';}
 function dayName(iso,i){if(i===0)return'Hoy';if(i===1)return'Mañana';return new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(new Date(`${iso}T12:00:00`)).replace('.','').replace(/^./,c=>c.toUpperCase());}
+function dateShort(iso){return new Intl.DateTimeFormat('es-ES',{day:'numeric',month:'short'}).format(new Date(`${iso}T12:00:00`)).replace('.','');}
 function saveRecent(place){ if(!place?.manual)return; const old=JSON.parse(localStorage.getItem('weatherRecents')||'[]'); const next=[place,...old.filter(x=>!(x.name===place.name&&x.admin1===place.admin1))].slice(0,5); localStorage.setItem('weatherRecents',JSON.stringify(next)); renderRecents(); }
 function renderRecents(){const list=JSON.parse(localStorage.getItem('weatherRecents')||'[]');$('recentWrap').classList.toggle('hidden',!list.length);$('recentList').innerHTML=list.map((p,i)=>`<button class="recent-item" data-recent="${i}">🕘 <span><strong>${esc(p.name)}</strong><small>${esc([p.admin1,p.country].filter(Boolean).join(', '))}</small></span></button>`).join('');document.querySelectorAll('[data-recent]').forEach(b=>b.onclick=()=>selectPlace(list[Number(b.dataset.recent)]));}
 
@@ -60,7 +61,7 @@ function placeLabel(p){return p?.name || 'Mi ubicación';}
 function selectPlace(place){ currentPlace={...place}; $('placeIcon').textContent=place.manual?'🔎':'📍'; $('placeName').textContent=placeLabel(place); $('searchPanel').classList.add('hidden'); $('searchInput').value=''; $('searchResults').innerHTML=''; saveRecent(place); loadWeather(place); }
 
 async function getForecast(place){
-  const q=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'auto',forecast_days:'7',current:'temperature_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,precipitation',hourly:'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,is_day,wind_speed_10m,cloud_cover',daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum'});
+  const q=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'auto',forecast_days:'7',current:'temperature_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,precipitation',hourly:'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,is_day,wind_speed_10m,cloud_cover',daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max'});
   const r=await fetch(`${API}/forecast?${q}`); if(!r.ok)throw new Error('No se pudo obtener la previsión'); return r.json();
 }
 async function getModel(endpoint,place){
@@ -89,7 +90,23 @@ function renderMain(data){
   }).join('');
 
   const d=data.daily||{};
-  $('dailyList').innerHTML=(d.time||[]).map((date,i)=>{const [_,ic]=wx(d.weather_code[i],1);return `<div class="day-row"><span class="day">${dayName(date,i)}</span><span>${ic}</span><span class="rain">💧 ${fmt(d.precipitation_probability_max[i])}% · ${fmt(d.precipitation_sum[i],1)} mm</span><span class="temps"><strong>${fmt(d.temperature_2m_max[i])}°</strong> <span class="min">${fmt(d.temperature_2m_min[i])}°</span></span></div>`}).join('');
+  $('dailyList').innerHTML=(d.time||[]).map((date,i)=>{
+    const [_,ic]=wx(d.weather_code[i],1);
+    const rainProb=Number(d.precipitation_probability_max?.[i])||0;
+    const rainMm=Math.max(0,Number(d.precipitation_sum?.[i])||0);
+    const wind=Math.max(0,Number(d.wind_speed_10m_max?.[i])||0);
+    const mmDigits=rainMm>0&&rainMm<0.1?2:1;
+    return `<div class="day-row">
+      <div class="day-main"><span class="day">${dayName(date,i)}</span><span class="date">${dateShort(date)}</span></div>
+      <span class="day-icon">${ic}</span>
+      <div class="day-metrics">
+        <span>💧 ${fmt(rainProb)}%</span>
+        <span>☔ ${fmt(rainMm,mmDigits)} mm</span>
+        <span>💨 ${fmt(wind)} km/h</span>
+      </div>
+      <div class="temps"><strong>${fmt(d.temperature_2m_max[i])}°</strong><span class="min">${fmt(d.temperature_2m_min[i])}°</span></div>
+    </div>`;
+  }).join('');
   renderRain(data,nowIndex);
 }
 
