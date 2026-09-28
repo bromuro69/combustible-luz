@@ -2,12 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Energías" />
-  <title>Energías</title>
+  <meta name="apple-mobile-web-app-title" content="Tiempo" />
+  <title>Tiempo</title>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/icon.svg" />
   <link rel="stylesheet" href="/styles.css" />
@@ -16,137 +16,72 @@
   <main class="app-shell">
     <header class="topbar">
       <div>
-        <p class="eyebrow">PRECIOS DE ENERGÍA</p>
-        <h1>Energías</h1>
-        <p id="lastUpdated" class="subtle">Cargando…</p>
+        <p class="eyebrow">PREVISIÓN METEOROLÓGICA</p>
+        <h1>Tiempo</h1>
+        <button id="placeBtn" class="place-btn" type="button"><span id="placeIcon">📍</span> <span id="placeName">Localizando…</span> <span class="chevron">⌄</span></button>
       </div>
-      <button id="refreshBtn" class="icon-btn" type="button" aria-label="Actualizar" title="Actualizar">↻</button>
+      <button id="refreshBtn" class="icon-btn" type="button" aria-label="Actualizar">↻</button>
     </header>
 
-    <nav class="tabs" aria-label="Secciones">
-      <button class="tab active" type="button" data-tab="fuel">⛽ Combustible</button>
-      <button class="tab" type="button" data-tab="electricity">⚡ Luz</button>
-      <button class="tab" type="button" data-tab="gas">🔥 Gas</button>
-    </nav>
+    <section id="searchPanel" class="search-panel hidden">
+      <div class="search-box"><span>⌕</span><input id="searchInput" type="search" autocomplete="off" placeholder="Buscar ciudad o lugar…" /></div>
+      <button id="myLocationBtn" class="location-row" type="button">📍 <span><strong>Mi ubicación</strong><small>Usar la posición del dispositivo</small></span></button>
+      <div id="searchResults" class="search-results"></div>
+      <div id="recentWrap" class="recent-wrap hidden"><p class="mini-label">RECIENTES</p><div id="recentList"></div></div>
+    </section>
 
     <section id="status" class="status hidden" role="status"></section>
 
-    <section id="fuel" class="panel active" aria-label="Combustible">
-      <article class="card">
-        <div class="section-head">
+    <section id="weatherContent" class="content hidden">
+      <article class="card hero-card">
+        <div class="hero-top">
           <div>
-            <span class="card-label">EASYGAS · ROCES</span>
-            <h2>Precios de referencia</h2>
+            <span class="card-label">AHORA</span>
+            <div class="temperature"><strong id="currentTemp">—</strong><span>°</span></div>
+            <p id="currentText" class="condition">—</p>
+            <p id="feelsLike" class="subtle">Sensación —</p>
           </div>
-          <span id="easygasUpdated" class="badge">—</span>
+          <div id="currentIcon" class="weather-icon">☁️</div>
         </div>
-        <div id="easygasGrid" class="fuel-grid"></div>
+        <div class="stats-grid">
+          <div><span>💧 Lluvia</span><strong id="currentRain">—</strong></div>
+          <div><span>💨 Viento</span><strong id="currentWind">—</strong></div>
+          <div><span>☁️ Nubes</span><strong id="currentCloud">—</strong></div>
+        </div>
       </article>
 
-      <article class="card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">MÁS BARATO EN GIJÓN</span>
-            <h2>Mejor precio por combustible</h2>
-          </div>
-        </div>
-        <div id="cheapestFuel" class="fuel-stack"></div>
-      </article>
-
-      <p class="source-note">Combustible: Geoportal de precios de carburantes del Ministerio para la Transición Ecológica / servicio REST oficial. Los precios los comunican las estaciones de servicio.</p>
-    </section>
-
-    <section id="electricity" class="panel" aria-label="Luz">
-      <div class="hero-grid">
-        <article class="card hero-card">
-          <span class="card-label">AHORA</span>
-          <div class="hero-value-row">
-            <span id="currentDot" class="dot"></span>
-            <strong id="currentPrice" class="hero-value">—</strong>
-            <span class="unit">€/kWh</span>
-          </div>
-          <p id="currentHour" class="subtle">—</p>
-        </article>
-
-        <article class="card hero-card">
-          <span class="card-label">PRÓXIMA HORA BARATA</span>
-          <strong id="nextCheapHour" class="hero-value">—</strong>
-          <p id="nextCheapPrice" class="subtle">—</p>
-        </article>
-      </div>
-
-      <article class="card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">TOP 3 DE HOY</span>
-            <h2>Mejores horas</h2>
-          </div>
-        </div>
-        <div id="top3" class="top3"></div>
+      <article id="rainCard" class="card rain-card">
+        <div class="section-head"><div><span class="card-label">LLUVIA</span><h2 id="rainHeadline">Calculando…</h2></div><span id="rainConfidence" class="confidence">—</span></div>
+        <p id="rainDetail" class="subtle">—</p>
+        <div id="rainBars" class="rain-bars"></div>
       </article>
 
       <article class="card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">ORDEN HORARIO</span>
-            <h2>Precio por hora</h2>
-          </div>
-        </div>
-        <div id="hourlyChart" class="mini-chart" aria-label="Gráfico horario de precio"></div>
-        <div id="hourlyList" class="price-list"></div>
+        <div class="section-head"><div><span class="card-label">PRÓXIMAS HORAS</span><h2>Hoy</h2></div></div>
+        <div id="hourlyStrip" class="hourly-strip"></div>
       </article>
 
       <article class="card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">DE MENOR A MAYOR</span>
-            <h2>Las 24 horas</h2>
-          </div>
-          <div class="legend" aria-label="Leyenda de precios">
-            <span>🟢 8 baratas</span><span>🟠 8 medias</span><span>🔴 8 caras</span>
-          </div>
-        </div>
-        <div id="rankingList" class="price-list"></div>
+        <div class="section-head"><div><span class="card-label">PRÓXIMOS DÍAS</span><h2>7 días</h2></div></div>
+        <div id="dailyList" class="daily-list"></div>
       </article>
 
-      <p class="source-note">PVPC: datos de PreciLuz a partir de Red Eléctrica de España (REE/ESIOS). El precio mostrado corresponde al término horario de energía; la factura final puede incluir otros conceptos e impuestos.</p>
-    </section>
-
-    <section id="gas" class="panel" aria-label="Gas natural">
-      <article class="card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">GAS NATURAL REGULADO</span>
-            <h2>Tarifa de Último Recurso</h2>
-          </div>
-          <span id="gasPeriod" class="badge">—</span>
-        </div>
-        <div id="gasNotice" class="gas-notice hidden"></div>
-        <div id="gasGrid" class="gas-grid"></div>
+      <article class="card consensus-card">
+        <div class="section-head"><div><span class="card-label">CONSENSO DE MODELOS</span><h2>Fiabilidad de la previsión</h2></div><span id="consensusBadge" class="confidence">—</span></div>
+        <p id="consensusText" class="subtle">Comparando ECMWF, ICON y GFS…</p>
+        <div id="modelGrid" class="model-grid"></div>
       </article>
 
-      <article class="card gas-help">
-        <span class="card-label">CÓMO LEERLO</span>
-        <h2>Tu TUR depende del consumo anual</h2>
-        <p><strong>TUR.1</strong> hasta 5.000 kWh/año · <strong>TUR.2</strong> de 5.000 a 15.000 · <strong>TUR.3</strong> de 15.000 a 50.000.</p>
-        <p>El término variable se aplica a cada kWh consumido y el término fijo se cobra cada mes.</p>
-      </article>
-
-      <p class="source-note">Gas natural: TUR oficial publicada en el BOE. Los importes mostrados son los términos fijo y variable; la factura final puede incluir impuestos, alquiler de contador y otros conceptos. <a id="gasSourceLink" class="source-link hidden" href="#" target="_blank" rel="noopener noreferrer">Ver publicación oficial</a></p>
+      <p class="source-note">Datos meteorológicos: Open-Meteo. Consenso calculado comparando ECMWF IFS, DWD ICON y NOAA GFS. La previsión puede cambiar con nuevas actualizaciones de los modelos.</p>
     </section>
 
     <footer>
       <button id="installBtn" class="install-btn" type="button">Añadir a pantalla de inicio</button>
-      <p class="footer-note">Energías funciona como PWA en iPhone, Android, iPad, Mac y PC.</p>
+      <p id="lastUpdated" class="footer-note">—</p>
     </footer>
   </main>
 
-  <dialog id="iosInstallDialog">
-    <h3>Instalar Energías en iPhone o iPad</h3>
-    <p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p>
-    <button id="closeDialog" type="button">Entendido</button>
-  </dialog>
-
+  <dialog id="iosInstallDialog"><h3>Instalar Tiempo</h3><p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p><button id="closeDialog" type="button">Entendido</button></dialog>
   <script src="/app.js" defer></script>
 </body>
 </html>
