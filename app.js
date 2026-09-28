@@ -66,23 +66,29 @@ function renderRain(data,nowIndex){
   $('rainBars').innerHTML=probs.map((p,i)=>`<div class="rain-col"><div class="rain-bar" style="height:${Math.max(3,Number(p)*.62)}px;opacity:${.35+Number(p)/160}"></div><small>${hourOf(times[i]).slice(0,2)}</small></div>`).join('');
 }
 
-function consensus(models,data){
-  const ok=models.filter(x=>x.status==='fulfilled').map(x=>x.value); const names=['ECMWF','ICON','GFS'];
-  $('modelGrid').innerHTML=models.map((m,i)=>m.status==='fulfilled'?`<div class="model"><span>${names[i]}</span><strong>${fmt(m.value.current?.temperature_2m)}° · ${wx(m.value.current?.weather_code)[0]}</strong></div>`:`<div class="model"><span>${names[i]}</span><strong>Sin dato</strong></div>`).join('');
-  if(ok.length<2){setConfidence('medium','MEDIA');$('consensusText').textContent='No hemos podido comparar suficientes modelos en esta actualización.';return;}
-  const temps=ok.map(m=>Number(m.current?.temperature_2m)).filter(Number.isFinite); const tempSpread=Math.max(...temps)-Math.min(...temps);
-  const sums=ok.map(m=>(m.hourly?.precipitation||[]).slice(0,12).reduce((a,b)=>a+(Number(b)||0),0)); const rainSpread=Math.max(...sums)-Math.min(...sums); const rainy=sums.filter(v=>v>=0.5).length;
-  let level='high',label='ALTA'; if(tempSpread>3||rainSpread>4||(rainy>0&&rainy<ok.length)){level='medium';label='MEDIA';} if(tempSpread>5||rainSpread>8){level='low';label='BAJA';}
-  setConfidence(level,label); $('consensusText').textContent=level==='high'?'Los principales modelos coinciden bastante en el corto plazo.':level==='medium'?'Hay algunas diferencias entre modelos; conviene revisar las próximas actualizaciones.':'Los modelos discrepan de forma notable. La previsión tiene más incertidumbre de lo normal.';
-  $('rainConfidence').className=`confidence ${level}`;$('rainConfidence').textContent=`Confianza ${label.toLowerCase()}`;
+function updateRainConfidence(models){
+  const ok=models.filter(x=>x.status==='fulfilled').map(x=>x.value);
+  let level='medium',label='media';
+  if(ok.length>=2){
+    const temps=ok.map(m=>Number(m.current?.temperature_2m)).filter(Number.isFinite);
+    const tempSpread=temps.length?Math.max(...temps)-Math.min(...temps):0;
+    const sums=ok.map(m=>(m.hourly?.precipitation||[]).slice(0,12).reduce((a,b)=>a+(Number(b)||0),0));
+    const rainSpread=sums.length?Math.max(...sums)-Math.min(...sums):0;
+    const rainy=sums.filter(v=>v>=0.5).length;
+    level='high'; label='alta';
+    if(tempSpread>3||rainSpread>4||(rainy>0&&rainy<ok.length)){level='medium';label='media';}
+    if(tempSpread>5||rainSpread>8){level='low';label='baja';}
+  }
+  $('rainConfidence').className=`confidence ${level}`;
+  $('rainConfidence').textContent=`Confianza ${label}`;
 }
-function setConfidence(level,label){$('consensusBadge').className=`confidence ${level}`;$('consensusBadge').textContent=label;}
 
 async function loadWeather(place=currentPlace){
   if(!place)return; setLoading(true); setStatus(''); $('weatherContent').classList.remove('hidden');
   try{
     const main=await getForecast(place); renderMain(main);
-    const models=await Promise.allSettled(['ecmwf','dwd-icon','gfs'].map(e=>getModel(e,place))); consensus(models,main);
+    const models=await Promise.allSettled(['ecmwf','dwd-icon','gfs'].map(e=>getModel(e,place)));
+    updateRainConfidence(models);
     $('lastUpdated').textContent=`Actualizado ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
   }catch(e){setStatus(`No se pudo actualizar el tiempo: ${e.message}`);}finally{setLoading(false);}
 }
