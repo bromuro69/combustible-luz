@@ -15,7 +15,7 @@ function hourLabel(h) { return `${String(h).padStart(2, '0')}:00`; }
 function hourRange(h) { return `${hourLabel(h)}–${hourLabel((h + 1) % 24)}`; }
 function rankClass(rank) { return rank < 8 ? 'green' : rank < 16 ? 'orange' : 'red'; }
 function rankEmoji(rank) { return rank < 8 ? '🟢' : rank < 16 ? '🟠' : '🔴'; }
-function escapeHtml(str='') { return String(str).replace(/[&<>'\"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','\"':'&quot;'}[ch])); }
+function escapeHtml(str='') { return String(str).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[ch])); }
 
 function renderElectricity(data) {
   const hours = [...data.hours].sort((a,b) => a.hora - b.hora);
