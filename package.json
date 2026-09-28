@@ -1,0 +1,8 @@
+{
+  "name": "combustible-luz-pwa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PWA de PVPC y combustible para Gijón",
+  "scripts": { "test": "node tests.js" },
+  "engines": { "node": ">=18" }
+}
