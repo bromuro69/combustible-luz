@@ -53,6 +53,15 @@
         </div>
       </article>
 
+      <section id="aemetAlerts" class="alerts-card hidden" aria-label="Avisos meteorológicos de AEMET">
+        <div class="alerts-head">
+          <div><span class="card-label">AVISOS OFICIALES</span><h2>AEMET</h2></div>
+          <span id="alertsCount" class="alerts-count">—</span>
+        </div>
+        <div id="alertsList" class="alerts-list"></div>
+        <a class="aemet-link" href="https://www.aemet.es/es/eltiempo/prediccion/avisos" target="_blank" rel="noopener noreferrer">Ver avisos en AEMET ↗</a>
+      </section>
+
       <article class="card">
         <div class="section-head"><div><span class="card-label">PRÓXIMAS HORAS</span><h2>24 horas</h2></div></div>
         <div id="hourlyStrip" class="hourly-strip"></div>
@@ -68,7 +77,7 @@
         <div id="dailyList" class="daily-list"></div>
       </article>
 
-      <p class="source-note">Datos meteorológicos: Open-Meteo. La previsión puede cambiar con nuevas actualizaciones de los modelos meteorológicos.</p>
+      <p class="source-note">Previsión meteorológica: Open-Meteo. Avisos oficiales: AEMET Meteoalerta. La previsión y los avisos pueden cambiar con nuevas actualizaciones.</p>
     </section>
 
     <footer>
