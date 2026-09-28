@@ -50,15 +50,15 @@
         </div>
       </article>
 
-      <article id="rainCard" class="card rain-card">
-        <div class="section-head"><div><span class="card-label">LLUVIA</span><h2 id="rainHeadline">Calculando…</h2></div><span id="rainConfidence" class="confidence">—</span></div>
-        <p id="rainDetail" class="subtle">—</p>
-        <div id="rainBars" class="rain-bars"></div>
-      </article>
-
       <article class="card">
         <div class="section-head"><div><span class="card-label">PRÓXIMAS HORAS</span><h2>Hoy</h2></div></div>
         <div id="hourlyStrip" class="hourly-strip"></div>
+
+        <div id="rainCard" class="rain-inline">
+          <div class="section-head"><div><span class="card-label">LLUVIA</span><h2 id="rainHeadline">Calculando…</h2></div><span id="rainConfidence" class="confidence">—</span></div>
+          <p id="rainDetail" class="subtle">—</p>
+          <div id="rainBars" class="rain-bars"></div>
+        </div>
       </article>
 
       <article class="card">
@@ -66,13 +66,7 @@
         <div id="dailyList" class="daily-list"></div>
       </article>
 
-      <article class="card consensus-card">
-        <div class="section-head"><div><span class="card-label">CONSENSO DE MODELOS</span><h2>Fiabilidad de la previsión</h2></div><span id="consensusBadge" class="confidence">—</span></div>
-        <p id="consensusText" class="subtle">Comparando ECMWF, ICON y GFS…</p>
-        <div id="modelGrid" class="model-grid"></div>
-      </article>
-
-      <p class="source-note">Datos meteorológicos: Open-Meteo. Consenso calculado comparando ECMWF IFS, DWD ICON y NOAA GFS. La previsión puede cambiar con nuevas actualizaciones de los modelos.</p>
+      <p class="source-note">Datos meteorológicos: Open-Meteo. La previsión puede cambiar con nuevas actualizaciones de los modelos meteorológicos.</p>
     </section>
 
     <footer>
