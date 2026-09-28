@@ -1,11 +1,11 @@
 {
-  "name": "Energías",
-  "short_name": "Energías",
-  "description": "Precios de combustible en Gijón, PVPC de la luz y tarifa regulada de gas natural.",
+  "name": "Tiempo",
+  "short_name": "Tiempo",
+  "description": "Previsión meteorológica con ubicación, búsqueda y consenso entre modelos.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#070b14",
-  "theme_color": "#111827",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
   "lang": "es",
   "icons": [
     { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
