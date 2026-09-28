@@ -2,8 +2,9 @@ const $ = (id) => document.getElementById(id);
 let deferredPrompt = null;
 let searchTimer = null;
 let currentPlace = null;
+let alertsRequestId = 0;
 
-const GIJON = { name:'Gijón', admin1:'Asturias', country:'España', latitude:43.5322, longitude:-5.6611, timezone:'Europe/Madrid', manual:true };
+const GIJON = { name:'Gijón', admin1:'Asturias', country:'España', country_code:'ES', latitude:43.5322, longitude:-5.6611, timezone:'Europe/Madrid', manual:true };
 const API = 'https://api.open-meteo.com/v1';
 const GEO = 'https://geocoding-api.open-meteo.com/v1/search';
 
@@ -58,7 +59,7 @@ function renderRecents(){const list=JSON.parse(localStorage.getItem('weatherRece
 function setStatus(text=''){ $('status').textContent=text; $('status').classList.toggle('hidden',!text); }
 function setLoading(on){$('refreshBtn').classList.toggle('loading',on);$('refreshBtn').disabled=on;}
 function placeLabel(p){return p?.name || 'Mi ubicación';}
-function selectPlace(place){ currentPlace={...place}; $('placeIcon').textContent=place.manual?'🔎':'📍'; $('placeName').textContent=placeLabel(place); $('searchPanel').classList.add('hidden'); $('searchInput').value=''; $('searchResults').innerHTML=''; saveRecent(place); loadWeather(place); }
+function selectPlace(place){ currentPlace={...place}; $('placeIcon').textContent=place.manual?'🔎':'📍'; $('placeName').textContent=placeLabel(place); $('searchPanel').classList.add('hidden'); $('searchInput').value=''; $('searchResults').innerHTML=''; $('aemetAlerts').classList.add('hidden'); saveRecent(place); loadWeather(place); }
 
 async function getForecast(place){
   const q=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'auto',forecast_days:'7',current:'temperature_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,precipitation',hourly:'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,is_day,wind_speed_10m,cloud_cover',daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max'});
@@ -67,6 +68,52 @@ async function getForecast(place){
 async function getModel(endpoint,place){
   const q=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'auto',forecast_days:'2',current:'temperature_2m,weather_code',hourly:'temperature_2m,precipitation'});
   const r=await fetch(`${API}/${endpoint}?${q}`); if(!r.ok)throw new Error(endpoint); return r.json();
+}
+async function getAlerts(place){
+  const q=new URLSearchParams({lat:String(place.latitude),lon:String(place.longitude)});
+  const r=await fetch(`/api/alerts?${q}`,{cache:'no-store'});
+  if(!r.ok)throw new Error('AEMET no disponible');
+  return r.json();
+}
+function alertIcon(event=''){
+  const s=String(event).toLowerCase();
+  if(s.includes('viento'))return'💨';
+  if(s.includes('lluv')||s.includes('precipit'))return'🌧️';
+  if(s.includes('nieve')||s.includes('nevad'))return'❄️';
+  if(s.includes('torment'))return'⛈️';
+  if(s.includes('calor')||s.includes('temperatura'))return'🌡️';
+  if(s.includes('costa')||s.includes('mar')||s.includes('oleaje'))return'🌊';
+  if(s.includes('niebla'))return'🌫️';
+  return'⚠️';
+}
+function alertMoment(iso){
+  if(!iso)return'';
+  const d=new Date(iso);if(Number.isNaN(d.getTime()))return'';
+  return new Intl.DateTimeFormat('es-ES',{weekday:'short',hour:'2-digit',minute:'2-digit'}).format(d).replace('.','');
+}
+function renderAlerts(data){
+  const card=$('aemetAlerts');
+  const alerts=Array.isArray(data?.alerts)?data.alerts:[];
+  if(!alerts.length){card.classList.add('hidden');$('alertsList').innerHTML='';return;}
+  $('alertsCount').textContent=`${alerts.length} ${alerts.length===1?'activo':'activos'}`;
+  $('alertsList').innerHTML=alerts.map(a=>{
+    const start=alertMoment(a.onset),end=alertMoment(a.expires);
+    const timeText=start&&end?`${start} → ${end}`:start||end||'';
+    const probability=a.probability?`<span>🎯 ${esc(a.probability)}</span>`:'';
+    const detail=a.detail?`<p class="alert-detail">${esc(a.detail)}</p>`:'';
+    return `<article class="alert-item level-${esc(a.level)}"><div class="alert-top"><span class="alert-icon">${alertIcon(a.event)}</span><div class="alert-title"><span class="alert-level">Aviso ${esc(a.level)}</span><strong>${esc(a.event)}</strong></div></div><p class="alert-zone">${esc(a.area)}</p><div class="alert-meta">${timeText?`<span>🕒 ${esc(timeText)}</span>`:''}${probability}</div>${detail}</article>`;
+  }).join('');
+  card.classList.remove('hidden');
+}
+async function loadAlerts(place){
+  const requestId=++alertsRequestId;
+  try{
+    const data=await getAlerts(place);
+    if(requestId!==alertsRequestId)return;
+    renderAlerts(data);
+  }catch{
+    if(requestId===alertsRequestId)$('aemetAlerts').classList.add('hidden');
+  }
 }
 
 function renderMain(data){
@@ -149,7 +196,7 @@ function updateRainConfidence(models){
 async function loadWeather(place=currentPlace){
   if(!place)return; setLoading(true); setStatus(''); $('weatherContent').classList.remove('hidden');
   try{
-    const main=await getForecast(place); renderMain(main);
+    const main=await getForecast(place); renderMain(main); loadAlerts(place);
     const models=await Promise.allSettled(['ecmwf','dwd-icon','gfs'].map(e=>getModel(e,place)));
     updateRainConfidence(models);
     $('lastUpdated').textContent=`Actualizado ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
