@@ -18,19 +18,25 @@ const weatherMap = {
 const PRECIP_CODES = new Set([51,53,55,56,57,61,63,65,66,67,71,73,75,77,80,81,82,85,86,95,96,99]);
 
 function wx(code, isDay=1){
-  const item = weatherMap[Number(code)] || ['Variable','☁️'];
-  if(Number(code)===0 && !Number(isDay)) return ['Despejado','🌙'];
-  if(Number(code)===1 && !Number(isDay)) return ['Poco nuboso','🌙'];
-  return item;
+  const codeNum=Number(code);
+  const day=Number(isDay)!==0;
+  if(!day){
+    if(codeNum===0)return ['Despejado','🌙'];
+    if(codeNum===1)return ['Poco nuboso','🌙'];
+    if(codeNum===2)return ['Parcialmente nuboso','🌙☁️'];
+    if(codeNum===3)return ['Nublado','☁️'];
+  }
+  return weatherMap[codeNum] || ['Variable','☁️'];
 }
 function dryWx(cloudCover,isDay=1){
   const cloud=Number(cloudCover);
+  const day=Number(isDay)!==0;
   if(Number.isFinite(cloud)){
     if(cloud>=80)return ['Nublado','☁️'];
-    if(cloud>=45)return ['Parcialmente nuboso',Number(isDay)?'⛅️':'☁️'];
-    if(cloud>=20)return ['Poco nuboso',Number(isDay)?'🌤️':'🌙'];
+    if(cloud>=45)return ['Parcialmente nuboso',day?'⛅️':'🌙☁️'];
+    if(cloud>=20)return ['Poco nuboso',day?'🌤️':'🌙'];
   }
-  return Number(isDay)?['Despejado','☀️']:['Despejado','🌙'];
+  return day?['Despejado','☀️']:['Despejado','🌙'];
 }
 function displayWx(code,isDay=1,probability=null,precipitation=null,cloudCover=null){
   const codeNum=Number(code);
@@ -72,8 +78,13 @@ function renderMain(data){
   $('feelsLike').textContent=`Sensación ${fmt(c.apparent_temperature)}°`;
   $('currentRain').textContent=`${fmt(c.precipitation,1)} mm`; $('currentWind').textContent=`${fmt(c.wind_speed_10m)} km/h`; $('currentCloud').textContent=`${fmt(c.cloud_cover)} %`;
 
-  const indexes=Array.from({length:12},(_,i)=>nowIndex+i).filter(i=>i<(h.time||[]).length);
-  $('hourlyStrip').innerHTML=indexes.map((i,k)=>{const [_,ic]=displayWx(h.weather_code[i],h.is_day?.[i],h.precipitation_probability?.[i],h.precipitation?.[i],h.cloud_cover?.[i]);return `<div class="hour-card ${k===0?'now':''}"><span class="time">${k===0?'Ahora':hourOf(h.time[i])}</span><div class="icon">${ic}</div><strong>${fmt(h.temperature_2m[i])}°</strong><span class="rain">💧 ${fmt(h.precipitation_probability[i])}%</span></div>`}).join('');
+  const indexes=Array.from({length:24},(_,i)=>nowIndex+i).filter(i=>i<(h.time||[]).length);
+  $('hourlyStrip').innerHTML=indexes.map((i,k)=>{
+    const [_,ic]=displayWx(h.weather_code[i],h.is_day?.[i],h.precipitation_probability?.[i],h.precipitation?.[i],h.cloud_cover?.[i]);
+    const mm=Number(h.precipitation?.[i])||0;
+    const rainAmount=mm>=0.1?`<span class="rain-mm">☔ ${fmt(mm,1)} mm</span>`:'';
+    return `<div class="hour-card ${k===0?'now':''}"><span class="time">${k===0?'Ahora':hourOf(h.time[i])}</span><div class="icon">${ic}</div><strong>${fmt(h.temperature_2m[i])}°</strong><span class="feels" title="Sensación térmica">🌡️ ${fmt(h.apparent_temperature?.[i])}°</span><span class="rain">💧 ${fmt(h.precipitation_probability[i])}%</span>${rainAmount}</div>`;
+  }).join('');
 
   const d=data.daily||{};
   $('dailyList').innerHTML=(d.time||[]).map((date,i)=>{const [_,ic]=wx(d.weather_code[i],1);return `<div class="day-row"><span class="day">${dayName(date,i)}</span><span>${ic}</span><span class="rain">💧 ${fmt(d.precipitation_probability_max[i])}% · ${fmt(d.precipitation_sum[i],1)} mm</span><span class="temps"><strong>${fmt(d.temperature_2m_max[i])}°</strong> <span class="min">${fmt(d.temperature_2m_min[i])}°</span></span></div>`}).join('');
@@ -82,7 +93,7 @@ function renderMain(data){
 
 function renderRain(data,nowIndex){
   const h=data.hourly||{};
-  const end=Math.min(nowIndex+12,(h.time||[]).length);
+  const end=Math.min(nowIndex+24,(h.time||[]).length);
   const probs=(h.precipitation_probability||[]).slice(nowIndex,end).map(v=>Number(v)||0);
   const times=(h.time||[]).slice(nowIndex,end);
   const peak=Math.max(0,...probs);
@@ -91,7 +102,7 @@ function renderRain(data,nowIndex){
   const first70=probs.findIndex(p=>p>=70);
 
   if(peak<20){
-    $('rainHeadline').textContent='Sin lluvia prevista en las próximas horas';
+    $('rainHeadline').textContent='Sin lluvia prevista en las próximas 24 h';
   }else if(peak<40){
     $('rainHeadline').textContent=`Baja posibilidad de lluvia desde las ${hourOf(times[first20])}`;
   }else if(peak<70){
@@ -100,7 +111,6 @@ function renderRain(data,nowIndex){
     $('rainHeadline').textContent=`Lluvia probable desde las ${hourOf(times[first70])}`;
   }
   $('rainDetail').textContent=`Probabilidad máxima aproximada: ${fmt(peak)} %.`;
-  $('rainBars').innerHTML=probs.map((p,i)=>`<div class="rain-col"><div class="rain-bar" style="height:${Math.max(3,p*.62)}px;opacity:${.35+p/160}"></div><small>${hourOf(times[i]).slice(0,2)}</small></div>`).join('');
 }
 
 function updateRainConfidence(models){
@@ -109,7 +119,7 @@ function updateRainConfidence(models){
   if(ok.length>=2){
     const temps=ok.map(m=>Number(m.current?.temperature_2m)).filter(Number.isFinite);
     const tempSpread=temps.length?Math.max(...temps)-Math.min(...temps):0;
-    const sums=ok.map(m=>(m.hourly?.precipitation||[]).slice(0,12).reduce((a,b)=>a+(Number(b)||0),0));
+    const sums=ok.map(m=>(m.hourly?.precipitation||[]).slice(0,24).reduce((a,b)=>a+(Number(b)||0),0));
     const rainSpread=sums.length?Math.max(...sums)-Math.min(...sums):0;
     const rainy=sums.filter(v=>v>=0.5).length;
     level='high'; label='alta';
