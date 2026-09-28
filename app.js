@@ -11,6 +11,7 @@ function hasNumber(n) { return n !== null && n !== undefined && n !== '' && Numb
 function fmtPrice(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 5, maximumFractionDigits: 5 }) : '—'; }
 function fmtFuel(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) : '—'; }
 function fmtMoney(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'; }
+function fmtGasVariable(n) { return hasNumber(n) ? Number(n).toLocaleString('es-ES', { minimumFractionDigits: 6, maximumFractionDigits: 6 }) : '—'; }
 function hourLabel(h) { return `${String(h).padStart(2, '0')}:00`; }
 function hourRange(h) { return `${hourLabel(h)}–${hourLabel((h + 1) % 24)}`; }
 function rankClass(rank) { return rank < 8 ? 'green' : rank < 16 ? 'orange' : 'red'; }
@@ -71,6 +72,44 @@ function renderFuel(data) {
   }).join('');
 }
 
+function renderGas(data) {
+  const tariffs = Array.isArray(data.tariffs) ? data.tariffs : [];
+  $('gasPeriod').textContent = data.periodLabel || 'Tarifa vigente';
+  $('gasGrid').innerHTML = tariffs.map(t => `
+    <article class="gas-card">
+      <div class="gas-card-head">
+        <div>
+          <span class="card-label">${escapeHtml(t.id)}</span>
+          <h3>${escapeHtml(t.consumption)}</h3>
+        </div>
+      </div>
+      <div class="gas-main-price">
+        <strong>${fmtGasVariable(t.variablePerKwh)}</strong>
+        <span>€/kWh</span>
+      </div>
+      <p class="gas-caption">Término variable</p>
+      <div class="gas-fixed"><span>Fijo mensual</span><strong>${fmtMoney(t.fixedMonthly)} €/mes</strong></div>
+    </article>`).join('');
+
+  const notice = $('gasNotice');
+  if (data.validUntil) {
+    const expires = new Date(`${data.validUntil}T23:59:59+02:00`).getTime();
+    const expired = Number.isFinite(expires) && Date.now() > expires;
+    notice.classList.toggle('hidden', !expired);
+    if (expired) notice.textContent = 'Esta TUR ha terminado su periodo de vigencia. Estamos pendientes de cargar la siguiente tarifa oficial publicada en el BOE.';
+  } else {
+    notice.classList.add('hidden');
+  }
+
+  const sourceLink = $('gasSourceLink');
+  if (data.sourceUrl) {
+    sourceLink.href = data.sourceUrl;
+    sourceLink.classList.remove('hidden');
+  } else {
+    sourceLink.classList.add('hidden');
+  }
+}
+
 async function loadData(force=false) {
   $('status').classList.add('hidden'); $('refreshBtn').classList.add('loading'); $('refreshBtn').disabled=true;
   try {
@@ -78,7 +117,7 @@ async function loadData(force=false) {
     if (!res.ok) throw new Error(`Error ${res.status}`);
     const payload = await res.json();
     if (!payload.electricity?.hours?.length) throw new Error('No se recibieron precios de electricidad.');
-    renderElectricity(payload.electricity); renderFuel(payload.fuel||{});
+    renderFuel(payload.fuel||{}); renderElectricity(payload.electricity); renderGas(payload.gas||{});
     const ts=new Date(payload.generatedAt||Date.now()); $('lastUpdated').textContent=`Actualizado ${ts.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
   } catch(err) { $('status').textContent=`No se pudieron actualizar los datos: ${err.message}`; $('status').classList.remove('hidden'); }
   finally { $('refreshBtn').classList.remove('loading'); $('refreshBtn').disabled=false; }
