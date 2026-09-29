@@ -37,7 +37,7 @@ async function fetchJson(url, timeout=15000) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeout);
   try {
-    const r = await fetch(url, { headers:{Accept:'application/json','User-Agent':'Energias-PWA/1.2'}, signal:ctrl.signal });
+    const r = await fetch(url, { headers:{Accept:'application/json','User-Agent':'Energias-PWA/1.3'}, signal:ctrl.signal });
     if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
     return await r.json();
   } finally { clearTimeout(timer); }
@@ -50,24 +50,50 @@ async function fetchProductStations(productId) {
   }
   throw lastError || new Error('MITECO no disponible');
 }
-function scoreStation(s, q) {
+function queryTokens(q) {
+  return normalizeText(q).split(/\s+/).filter(Boolean);
+}
+function searchableText(s) {
+  return normalizeText([s.brand,s.address,s.locality,s.municipality,s.province,s.postalCode].filter(Boolean).join(' '));
+}
+function matchesTokens(s, tokens) {
+  const haystack = searchableText(s);
+  return tokens.every(token => haystack.includes(token));
+}
+function scoreStation(s, tokens) {
   const fields = [s.brand,s.address,s.locality,s.municipality,s.province,s.postalCode].map(normalizeText);
   let score = 0;
-  for (const value of fields) {
-    if (!value) continue;
-    if (value === q) score += 100;
-    else if (value.startsWith(q)) score += 45;
-    else if (value.includes(q)) score += 15;
+  for (const token of tokens) {
+    for (const value of fields) {
+      if (!value) continue;
+      if (value === token) score += 100;
+      else if (value.startsWith(token)) score += 45;
+      else if (value.includes(token)) score += 15;
+    }
   }
   return score;
+}
+function toRad(v){ return Number(v) * Math.PI / 180; }
+function distanceKm(lat1,lon1,lat2,lon2){
+  if (![lat1,lon1,lat2,lon2].every(v => Number.isFinite(Number(v)))) return null;
+  const R=6371;
+  const dLat=toRad(Number(lat2)-Number(lat1));
+  const dLon=toRad(Number(lon2)-Number(lon1));
+  const a=Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
 
 module.exports = async function handler(req,res) {
   res.setHeader('Access-Control-Allow-Origin','*');
   res.setHeader('Cache-Control','s-maxage=1800, stale-while-revalidate=3600');
   try {
-    const q = normalizeText(req.query?.q || '');
-    if (q.length < 2) return res.status(200).json({stations:[]});
+    const rawQ = String(req.query?.q || '').trim();
+    const tokens = queryTokens(rawQ);
+    if (normalizeText(rawQ).length < 2 || !tokens.length) return res.status(200).json({stations:[]});
+
+    const originLat = parseNumber(req.query?.lat);
+    const originLon = parseNumber(req.query?.lon);
+    const hasOrigin = Number.isFinite(originLat) && Number.isFinite(originLon);
 
     // Evitamos descargar el listado nacional completo (~20 MB), que hacía fallar la búsqueda en Vercel.
     const payloads = await Promise.all(SEARCH_PRODUCTS.map(fetchProductStations));
@@ -81,13 +107,23 @@ module.exports = async function handler(req,res) {
     }
 
     const stations = [...unique.values()]
-      .map(s => ({...s, score:scoreStation(s,q)}))
-      .filter(s => s.score > 0)
-      .sort((a,b) => b.score-a.score || a.brand.localeCompare(b.brand,'es'))
+      .filter(s => matchesTokens(s,tokens))
+      .map(s => {
+        const distance = hasOrigin ? distanceKm(originLat,originLon,s.lat,s.lon) : null;
+        return {...s, score:scoreStation(s,tokens), distanceKm:distance === null ? null : Math.round(distance*10)/10};
+      })
+      .sort((a,b) => {
+        if (hasOrigin) {
+          const ad = Number.isFinite(a.distanceKm) ? a.distanceKm : Number.POSITIVE_INFINITY;
+          const bd = Number.isFinite(b.distanceKm) ? b.distanceKm : Number.POSITIVE_INFINITY;
+          if (ad !== bd) return ad-bd;
+        }
+        return b.score-a.score || a.brand.localeCompare(b.brand,'es');
+      })
       .slice(0,30)
       .map(({score,...s}) => s);
 
-    res.status(200).json({stations});
+    res.status(200).json({stations, sortedByDistance:hasOrigin});
   } catch(err) {
     console.error(err);
     res.status(502).json({error:'No se pudieron buscar estaciones',detail:err?.message||String(err)});
