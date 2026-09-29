@@ -39,7 +39,8 @@ function renderElectricity(data) {
     $('nextCheapPrice').textContent = 'No quedan horas baratas hoy';
   }
 
-  $('top3').innerHTML = sorted.slice(0,3).map((x,i)=>`<div class="top-item"><span>${['1ª','2ª','3ª'][i]} mejor</span><strong>${hourLabel(x.hora)}</strong><span>${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
+  $('top3').innerHTML = sorted.slice(0,3).map((x,i)=>`<div class="top-item best-item"><span>${['1ª','2ª','3ª'][i]} mejor</span><strong>${hourLabel(x.hora)}</strong><span>${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
+  $('worst3').innerHTML = [...sorted].reverse().slice(0,3).map((x,i)=>`<div class="top-item worst-item"><span>${['1ª','2ª','3ª'][i]} más cara</span><strong>${hourLabel(x.hora)}</strong><span>${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
   $('hourlyList').innerHTML = hours.map(x => `<div class="price-row ${x.hora===nowHour?'current':''}"><span class="time">${hourLabel(x.hora)}</span><span>${rankEmoji(rankMap.get(x.hora))}</span><span class="price">${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
   $('rankingList').innerHTML = sorted.map((x,rank)=>`<div class="price-row ${x.hora===nowHour?'current':''}"><span class="time">${hourLabel(x.hora)}</span><span><span class="rank-dot ${rankClass(rank)}" style="display:inline-block;margin-right:8px"></span>${rank<8?'Barata':rank<16?'Media':'Cara'}</span><span class="price">${fmtPrice(x.pvpc)} €/kWh</span></div>`).join('');
   const vals = hours.map(x=>Number(x.pvpc)); const min=Math.min(...vals), max=Math.max(...vals), span=Math.max(max-min,.001);
