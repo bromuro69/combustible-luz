@@ -1,0 +1,37 @@
+/* Ajustes de legibilidad para móvil sin alterar la jerarquía visual principal */
+.eyebrow,.card-label,.mini-label{font-size:11.5px}
+.subtle{font-size:14.5px}
+.place-btn{font-size:16.5px}
+.search-box input{font-size:16.5px}
+.stats-grid span{font-size:12.5px}
+.stats-grid strong{font-size:16.5px}
+.confidence{font-size:11.5px}
+.hour-card .time{font-size:11.5px}
+.hour-card .feels{font-size:11px;margin-top:4px}
+.hour-card .rain{font-size:11px;margin-top:6px}
+.hour-card .rain-mm{font-size:10px;margin-top:7px}
+.rain-inline .card-label{font-size:10.5px}
+.rain-inline .subtle{font-size:13.5px;margin-top:3px}
+.day-row .date{font-size:11.5px}
+.day-metrics{font-size:12.5px}
+.source-note{font-size:11.5px}
+.status{font-size:14.5px}
+.outlook-text{font-size:16.5px}
+
+@media(max-width:600px){
+  .stats-grid strong{font-size:16px}
+  .hour-card{flex-basis:74px}
+  .day-row .day{font-size:14.5px}
+  .day-row .date{font-size:10.5px}
+  .day-metrics{font-size:11px;gap:5px 10px;line-height:1.3}
+  .temps strong{font-size:17.5px}
+  .temps .min{font-size:14.5px}
+  .outlook-text{font-size:15.5px;line-height:1.5}
+}
+
+@media(max-width:380px){
+  .hour-card{flex-basis:72px}
+  .day-metrics{font-size:10.5px}
+  .temps strong{font-size:16.5px}
+  .temps .min{font-size:13.5px}
+}
