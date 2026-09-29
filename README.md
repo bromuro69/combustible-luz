@@ -1,11 +1,9 @@
-# Energías
+# Tiempo
 
-PWA para consultar de forma rápida precios de combustible en Gijón, el precio horario de la electricidad (PVPC) y la Tarifa de Último Recurso (TUR) de gas natural.
+Aplicación meteorológica independiente, instalable en iPhone y otros dispositivos.
 
-## Secciones
-- Combustible: EasyGas Roces y estación más barata de Gijón por producto
-- Luz: precio actual, próxima hora barata, top 3, listado horario y ranking de 24 horas
-- Gas: TUR.1, TUR.2 y TUR.3 con término fijo y variable
-- Instalable como PWA en móvil, tablet y ordenador
+Muestra la previsión horaria de las próximas 24 horas, siete días, sensación térmica, probabilidad y cantidad prevista de lluvia, y avisos oficiales de AEMET para la ubicación seleccionada. Usa Open-Meteo para la previsión y RainViewer para observar lluvia actual cuando hay radar disponible.
 
-Los datos se sirven mediante una función serverless en `/api/dashboard`. Los precios de combustible y luz se cachean durante 5 minutos; la TUR de gas se actualiza cuando se publica un nuevo periodo oficial.
+La rama `tiempo` es la rama de producción del proyecto Tiempo en Vercel. La app Energías se desarrolla y publica por separado.
+
+La probabilidad meteorológica expresa incertidumbre: el acuerdo entre modelos no garantiza que una previsión sea correcta. La aplicación evita presentar estimaciones de llegada de lluvia como certezas.

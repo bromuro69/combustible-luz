@@ -1,8 +1,8 @@
 {
-  "name": "energias-pwa",
-  "version": "1.1.0",
+  "name": "tiempo-pwa",
+  "version": "1.0.0",
   "private": true,
-  "description": "PWA de combustible, luz y gas para Gijón",
-  "scripts": { "test": "node tests.js" },
+  "description": "Previsión meteorológica y avisos para iPhone y web",
+  "scripts": { "test": "node --check app.js && node --check smart-client.js && node --check api/smart.js && node --check api/alerts.js" },
   "engines": { "node": ">=18" }
 }

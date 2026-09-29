@@ -95,8 +95,8 @@ async function getRadarNowcast(lat,lon){
     const settled=await Promise.allSettled(frames.map(f=>fetchBuffer(`${meta.host}${f.path}/${size}/${zoom}/${lat}/${lon}/${color}/${options}.png`,5000).then(b=>({time:f.time,...analyzeRadarImage(decodePng(b))}))));
     const samples=settled.filter(x=>x.status==='fulfilled').map(x=>x.value).sort((a,b)=>a.time-b.time); if(samples.length<2)return {available:false};
     const latest=samples[samples.length-1]; const kmPerPx=Math.cos(Number(lat)*Math.PI/180)*156543.03392/(2**zoom)/1000;
-    const raining=latest.centerAlpha>=32; const finite=samples.filter(s=>Number.isFinite(s.nearestPx)); let arrivalMinutes=null,trend='stable';
-    if(!raining&&finite.length>=3){ const t0=finite[0].time; const points=finite.map(s=>({x:(s.time-t0)/60,y:s.nearestPx})); const slope=regressionSlope(points); if(Number.isFinite(slope)){ if(slope<-0.03)trend='approaching'; else if(slope>0.03)trend='moving-away'; if(slope<-0.05&&latest.nearestPx!==null){ const eta=latest.nearestPx/(-slope); if(eta>=0&&eta<=180)arrivalMinutes=Math.round(eta); } } }
+    // A nearest-pixel distance cannot identify a moving rain cell. Do not infer arrival time from it.
+    const raining=latest.centerAlpha>=32; const arrivalMinutes=null,trend='unknown';
     const nearbyKm=latest.nearestPx===null?null:Math.round(latest.nearestPx*kmPerPx*10)/10;
     return {available:true,source:'RainViewer',generatedAt:new Date((meta.generated||latest.time)*1000).toISOString(),frames:samples.length,raining,centerAlpha:latest.centerAlpha,nearbyKm,trend,arrivalMinutes};
   }catch(e){ return {available:false,error:e?.message||String(e)}; }
@@ -141,9 +141,7 @@ function applySmartFusion(base, deterministic, ensembles, radar, customWeights={
     if(hoursAhead<=2&&radar?.available){
       let p=num(out.hourly.precipitation_probability?.[i])||0;
       if(radar.raining){ p=Math.max(p,hoursAhead===0?95:hoursAhead===1?88:75); }
-      else if(Number.isFinite(radar.arrivalMinutes)){
-        const etaH=radar.arrivalMinutes/60; const delta=Math.abs(hoursAhead-etaH); if(delta<=.75)p=Math.max(p,etaH<=1?82:72);
-      } else if((radar.nearbyKm===null||radar.nearbyKm>35)&&p<70){ p*=.85; }
+      // Lack of a radar echo is not proof that rain will not arrive later.
       out.hourly.precipitation_probability[i]=Math.round(clamp(p,0,100));
     }
     const stormProb=num(base.hourly?.thunderstorm_probability?.[i]);
@@ -158,7 +156,7 @@ function applySmartFusion(base, deterministic, ensembles, radar, customWeights={
       const certainty=Number.isFinite(ensProb)?Math.abs(ensProb-50)*2:50;
       const spreadTemps=ensembles.map(e=>ensembleSpread(e.data,t,'temperature_2m')).filter(Number.isFinite); const tempPenalty=spreadTemps.length?clamp((mean(spreadTemps)||0)*8,0,25):10;
       let score=agreement*.58+certainty*.42-tempPenalty;
-      if(hoursAhead<=2&&radar?.available)score=score*.75+25;
+      if(hoursAhead<=2&&radar?.raining)score=score*.75+25;
       confScores.push(clamp(score,0,100));
     }
   }
