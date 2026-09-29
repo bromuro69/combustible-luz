@@ -48,7 +48,7 @@ function displayWx(code,isDay=1,probability=null,precipitation=null,cloudCover=n
   if(PRECIP_CODES.has(codeNum)&&veryLowChance&&negligibleRain)return dryWx(cloudCover,isDay);
   return wx(codeNum,isDay);
 }
-function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function esc(s=''){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#039;'}[c]));}
 function fmt(n,d=0){return Number.isFinite(Number(n))?Number(n).toLocaleString('es-ES',{maximumFractionDigits:d,minimumFractionDigits:d}):'—';}
 function hourOf(iso){return iso?.slice(11,16)||'—';}
 function dayName(iso,i){if(i===0)return'Hoy';if(i===1)return'Mañana';return new Intl.DateTimeFormat('es-ES',{weekday:'short'}).format(new Date(`${iso}T12:00:00`)).replace('.','').replace(/^./,c=>c.toUpperCase());}
@@ -132,8 +132,8 @@ function renderMain(data){
     const [_,ic]=displayWx(h.weather_code[i],h.is_day?.[i],probability,h.precipitation?.[i],h.cloud_cover?.[i]);
     const rawMm=Number(h.precipitation?.[i]);
     const mm=Number.isFinite(rawMm)?Math.max(0,rawMm):0;
-    const rainAmount=mm>0?`<span class="rain-mm">☔ ${fmt(mm,mm<0.1?2:1)} mm</span>`:'';
-    return `<div class="hour-card ${k===0?'now':''}"><span class="time">${k===0?'Ahora':hourOf(h.time[i])}</span><div class="icon">${ic}</div><strong>${fmt(h.temperature_2m[i])}°</strong><span class="feels" title="Sensación térmica">✋ ${fmt(h.apparent_temperature?.[i])}°</span><span class="rain">💧 ${fmt(probability)}%</span>${rainAmount}</div>`;
+    const rainAmount=mm>0?`<span class="rain-mm" style="margin-top:6px">💧 ${fmt(mm,mm<0.1?2:1)} mm</span>`:'';
+    return `<div class="hour-card ${k===0?'now':''}"><span class="time">${k===0?'Ahora':hourOf(h.time[i])}</span><div class="icon">${ic}</div><strong>${fmt(h.temperature_2m[i])}°</strong><span class="feels" title="Sensación térmica">✋ ${fmt(h.apparent_temperature?.[i])}°</span><span class="rain">☔ ${fmt(probability)}%</span>${rainAmount}</div>`;
   }).join('');
 
   const d=data.daily||{};
@@ -147,8 +147,8 @@ function renderMain(data){
       <div class="day-main"><span class="day">${dayName(date,i)}</span><span class="date">${dateShort(date)}</span></div>
       <span class="day-icon">${ic}</span>
       <div class="day-metrics">
-        <span>💧 ${fmt(rainProb)}%</span>
-        <span>☔ ${fmt(rainMm,mmDigits)} mm</span>
+        <span>☔ ${fmt(rainProb)}%</span>
+        <span>💧 ${fmt(rainMm,mmDigits)} mm</span>
         <span>💨 ${fmt(wind)} km/h</span>
       </div>
       <div class="temps"><strong>${fmt(d.temperature_2m_max[i])}°</strong><span class="min">${fmt(d.temperature_2m_min[i])}°</span></div>
