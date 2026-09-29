@@ -128,25 +128,29 @@ function renderOutlook(data,alerts=[]){
   if(!hours.length){el.textContent='Todavía no hay datos suficientes para resumir las próximas 24 horas.';return;}
   const end=new Date(Date.now()+24*60*60*1000);
   const relevant=(Array.isArray(alerts)?alerts:[]).filter(a=>(!a.onset||new Date(a.onset)<=end)&&(!a.expires||new Date(a.expires)>=new Date()));
-  if(relevant.length){el.textContent='AEMET tiene avisos para esta zona en las próximas 24 horas. Echa un vistazo a los detalles antes de hacer planes.';return;}
   const rain=hours.filter(x=>Number.isFinite(x.prob)).reduce((best,x)=>!best||x.prob>best.prob?x:best,null);
   const temps=hours.map(x=>x.temp).filter(Number.isFinite);
   const winds=hours.map(x=>x.wind).filter(Number.isFinite);
   const maxWind=winds.length?Math.max(...winds):null;
   const minTemp=temps.length?Math.round(Math.min(...temps)):null,maxTemp=temps.length?Math.round(Math.max(...temps)):null;
   const totalRain=hours.reduce((sum,x)=>sum+Math.max(0,x.mm),0);
-  let first;
-  if(rain?.prob>=75)first=`Pinta que el paraguas va a venir bien: alta probabilidad de lluvia hacia las ${hourOf(rain.time)}.`;
-  else if(rain?.prob>=45)first=`Ojo al cielo: hay probabilidad de lluvia hacia las ${hourOf(rain.time)}.`;
-  else if(rain?.prob>=30)first=`El cielo deja alguna duda: probabilidad baja de lluvia hacia las ${hourOf(rain.time)}.`;
-  else if(totalRain>=0.1)first='Podría caer alguna gota, aunque la probabilidad de lluvia es baja.';
-  else if(maxWind>=45)first='El viento puede ser el protagonista de las próximas 24 horas.';
-  else first='Las próximas 24 horas vienen bastante tranquilas.';
-  let second='';
-  if(maxWind>=45&&rain?.prob>=30)second=`También se espera viento de hasta ${fmt(maxWind)} km/h.`;
-  else if(minTemp!==null&&maxTemp!==null)second=minTemp===maxTemp?`Temperatura alrededor de ${minTemp} °C.`:`Temperaturas previstas entre ${minTemp} y ${maxTemp} °C.`;
-  else if(maxWind>=30&&maxWind<45)second=`Puede soplar viento de hasta ${fmt(maxWind)} km/h.`;
-  el.textContent=`${first} ${second}`.trim();
+  const issued=data.current?.time;
+  const until=issued?new Date(`${issued}Z`):null;
+  if(until&&!Number.isNaN(until.getTime()))until.setUTCHours(until.getUTCHours()+24);
+  const limit=until&&!Number.isNaN(until.getTime())?`${String(until.getUTCHours()).padStart(2,'0')}:${String(until.getUTCMinutes()).padStart(2,'0')}`:null;
+  const parts=[limit?`De ahora hasta mañana a las ${limit}, esta es la previsión para las próximas 24 horas.`:'Esta es la previsión para las próximas 24 horas.'];
+  if(relevant.length)parts.push('Hay avisos de AEMET para este periodo; consulta los detalles antes de hacer planes.');
+  if(rain?.prob>=75)parts.push(`Pinta que el paraguas va a venir bien: la probabilidad de lluvia llega al ${fmt(rain.prob)} % hacia las ${hourOf(rain.time)}.`);
+  else if(rain?.prob>=45)parts.push(`Ojo al cielo: la probabilidad de lluvia llega al ${fmt(rain.prob)} % hacia las ${hourOf(rain.time)}.`);
+  else if(rain?.prob>=30)parts.push(`Podría caer alguna gota hacia las ${hourOf(rain.time)}, aunque la probabilidad sigue siendo baja (${fmt(rain.prob)} %).`);
+  else if(totalRain>=0.1)parts.push('Podría caer alguna gota, aunque la probabilidad de lluvia es baja.');
+  else parts.push(relevant.length?'La previsión por horas no muestra lluvia destacable, pero conviene atender al aviso oficial.':'El tiempo pinta bastante tranquilo y no se espera lluvia destacable.');
+  if(totalRain>=0.1&&rain?.prob>=30)parts.push(`La cantidad estimada para todo el periodo ronda los ${fmt(totalRain,1)} mm.`);
+  const conditions=[];
+  if(minTemp!==null&&maxTemp!==null)conditions.push(minTemp===maxTemp?`temperatura alrededor de ${minTemp} °C`:`temperaturas entre ${minTemp} y ${maxTemp} °C`);
+  if(maxWind>=30)conditions.push(`viento de hasta ${fmt(maxWind)} km/h`);
+  if(conditions.length)parts.push(`Además, se prevén ${conditions.join(' y ')}.`);
+  el.textContent=parts.join(' ');
 }
 
 function renderMain(data){
