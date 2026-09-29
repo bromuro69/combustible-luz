@@ -13,13 +13,18 @@
   <link rel="stylesheet" href="/styles.css" />
   <link rel="stylesheet" href="/alerts.css" />
   <link rel="stylesheet" href="/readability.css" />
+  <style>
+    .title-row{display:flex;align-items:center;gap:10px}
+    .title-cloud{width:46px;height:46px;flex:0 0 46px;display:block;object-fit:contain}
+    @media(max-width:480px){.title-cloud{width:42px;height:42px;flex-basis:42px}}
+  </style>
 </head>
 <body>
   <main class="app-shell">
     <header class="topbar">
       <div>
         <p class="eyebrow">PREVISIÓN METEOROLÓGICA</p>
-        <h1>Tiempo</h1>
+        <div class="title-row"><img class="title-cloud" src="/title-cloud.png?v=1" alt="" aria-hidden="true" /><h1>Tiempo</h1></div>
         <button id="placeBtn" class="place-btn" type="button"><span id="placeIcon">📍</span> <span id="placeName">Localizando…</span> <span class="chevron">⌄</span></button>
       </div>
       <div class="top-actions">
