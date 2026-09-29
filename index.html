@@ -35,18 +35,23 @@
       <article class="card">
         <div class="section-head">
           <div>
-            <span class="card-label">EASYGAS · ROCES</span>
-            <h2>Precios de referencia</h2>
+            <span id="referenceEyebrow" class="card-label">MI GASOLINERA</span>
+            <h2 id="referenceName">Cargando…</h2>
+            <p id="referenceAddress" class="subtle compact-subtle"></p>
           </div>
-          <span id="easygasUpdated" class="badge">—</span>
+          <div class="fuel-head-actions">
+            <span id="fuelUpdated" class="badge">—</span>
+            <button id="fuelSettingsBtn" class="mini-action-btn" type="button" aria-label="Configurar combustible">⚙︎</button>
+          </div>
         </div>
-        <div id="easygasGrid" class="fuel-grid"></div>
+        <div id="referenceFuelGrid" class="fuel-grid"></div>
+        <p id="locationReferenceNote" class="location-reference-note hidden">Los precios más baratos se calculan alrededor de tu ubicación guardada.</p>
       </article>
 
       <article class="card">
         <div class="section-head">
           <div>
-            <span class="card-label">MÁS BARATO EN GIJÓN</span>
+            <span id="cheapestRadiusLabel" class="card-label">MÁS BARATO A 10 KM</span>
             <h2>Mejor precio por combustible</h2>
           </div>
         </div>
@@ -76,45 +81,25 @@
       </div>
 
       <article class="card price-highlight-card best-card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">TOP 3 DE HOY</span>
-            <h2>Mejores horas</h2>
-          </div>
-        </div>
+        <div class="section-head"><div><span class="card-label">TOP 3 DE HOY</span><h2>Mejores horas</h2></div></div>
         <div id="top3" class="top3"></div>
       </article>
 
       <article class="card price-highlight-card worst-card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">TOP 3 MÁS CARAS</span>
-            <h2>Peores horas</h2>
-          </div>
-        </div>
+        <div class="section-head"><div><span class="card-label">TOP 3 MÁS CARAS</span><h2>Peores horas</h2></div></div>
         <div id="worst3" class="top3"></div>
       </article>
 
       <article class="card">
-        <div class="section-head">
-          <div>
-            <span class="card-label">ORDEN HORARIO</span>
-            <h2>Precio por hora</h2>
-          </div>
-        </div>
+        <div class="section-head"><div><span class="card-label">ORDEN HORARIO</span><h2>Precio por hora</h2></div></div>
         <div id="hourlyChart" class="mini-chart" aria-label="Gráfico horario de precio"></div>
         <div id="hourlyList" class="price-list"></div>
       </article>
 
       <article class="card">
         <div class="section-head">
-          <div>
-            <span class="card-label">DE MENOR A MAYOR</span>
-            <h2>Las 24 horas</h2>
-          </div>
-          <div class="legend" aria-label="Leyenda de precios">
-            <span>🟢 8 baratas</span><span>🟠 8 medias</span><span>🔴 8 caras</span>
-          </div>
+          <div><span class="card-label">DE MENOR A MAYOR</span><h2>Las 24 horas</h2></div>
+          <div class="legend" aria-label="Leyenda de precios"><span>🟢 8 baratas</span><span>🟠 8 medias</span><span>🔴 8 caras</span></div>
         </div>
         <div id="rankingList" class="price-list"></div>
       </article>
@@ -125,10 +110,7 @@
     <section id="gas" class="panel" aria-label="Gas natural">
       <article class="card">
         <div class="section-head">
-          <div>
-            <span class="card-label">GAS NATURAL REGULADO</span>
-            <h2>Tarifa de Último Recurso</h2>
-          </div>
+          <div><span class="card-label">GAS NATURAL REGULADO</span><h2>Tarifa de Último Recurso</h2></div>
           <span id="gasPeriod" class="badge">—</span>
         </div>
         <div id="gasNotice" class="gas-notice hidden"></div>
@@ -150,6 +132,31 @@
       <p class="footer-note">Energías funciona como PWA en iPhone, Android, iPad, Mac y PC.</p>
     </footer>
   </main>
+
+  <dialog id="fuelSettingsDialog" class="settings-dialog">
+    <div class="dialog-head">
+      <div><span class="card-label">COMBUSTIBLE</span><h3>Configurar referencia</h3></div>
+      <button id="closeFuelSettings" class="dialog-close" type="button" aria-label="Cerrar">×</button>
+    </div>
+    <p class="settings-help">Elige tu gasolinera habitual o usa tu ubicación. La selección se guarda solo en este dispositivo.</p>
+
+    <label class="settings-label" for="stationSearch">Mi gasolinera</label>
+    <input id="stationSearch" class="settings-input" type="search" autocomplete="off" placeholder="Nombre, localidad, dirección o código postal" />
+    <div id="stationSearchStatus" class="search-status"></div>
+    <div id="stationResults" class="station-results"></div>
+
+    <div class="settings-divider"><span>o</span></div>
+    <button id="useLocationBtn" class="secondary-action-btn" type="button">📍 Usar mi ubicación actual</button>
+
+    <label class="settings-label" for="radiusSelect">Radio de comparación</label>
+    <select id="radiusSelect" class="settings-input">
+      <option value="5">5 km</option>
+      <option value="10" selected>10 km</option>
+      <option value="15">15 km</option>
+      <option value="25">25 km</option>
+    </select>
+    <p id="currentFuelSetting" class="current-setting"></p>
+  </dialog>
 
   <dialog id="iosInstallDialog">
     <h3>Instalar Energías en iPhone o iPad</h3>
