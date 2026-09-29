@@ -44,7 +44,7 @@ function highResUrl(model,lat,lon){
   })}`;
 }
 function ensembleUrl(model,lat,lon){
-  return `${ENSEMBLE}?${qs({latitude:lat,longitude:lon,timezone:'auto',forecast_days:3,models:model,hourly:'temperature_2m,precipitation,wind_speed_10m'})}`;
+  return `${ENSEMBLE}?${qs({latitude:lat,longitude:lon,timezone:'auto',forecast_days:7,models:model,hourly:'temperature_2m,precipitation'})}`;
 }
 
 function timeIndex(data,time){ return Array.isArray(data?.hourly?.time)?data.hourly.time.indexOf(time):-1; }
