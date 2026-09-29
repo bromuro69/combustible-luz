@@ -1,6 +1,7 @@
 const $ = (id) => document.getElementById(id);
 let deferredPrompt = null;
 let searchTimer = null;
+let searchOrigin = null;
 
 const PRODUCT_NAMES = { g95: 'Gasolina 95', g98: 'Gasolina 98', diesel: 'Gasóleo A' };
 const FUEL_CONFIG_KEY = 'energiasFuelConfigV1';
@@ -84,6 +85,9 @@ function renderFuel(data) {
   $('fuelUpdated').textContent = data.updatedLabel || 'Actualizado';
   $('cheapestRadiusLabel').textContent = `MÁS BARATO A ${data.radiusKm || config.radius} KM`;
 
+  if (hasNumber(ref.lat) && hasNumber(ref.lon)) searchOrigin={lat:Number(ref.lat),lon:Number(ref.lon)};
+  else if (config.mode==='location' && hasNumber(config.lat) && hasNumber(config.lon)) searchOrigin={lat:Number(config.lat),lon:Number(config.lon)};
+
   $('referenceFuelGrid').classList.toggle('hidden', !stationMode);
   $('locationReferenceNote').classList.toggle('hidden', stationMode);
   if (stationMode) {
@@ -154,6 +158,7 @@ function openFuelSettings() {
 function chooseStation(station) {
   const c=getFuelConfig();
   saveFuelConfig({mode:'station',radius:c.radius,station});
+  if (hasNumber(station.lat) && hasNumber(station.lon)) searchOrigin={lat:Number(station.lat),lon:Number(station.lon)};
   $('fuelSettingsDialog').close();
   loadData(true);
 }
@@ -162,11 +167,19 @@ async function searchStations(q) {
   if (q.trim().length<2) { status.textContent='Escribe al menos 2 caracteres.'; results.innerHTML=''; return; }
   status.textContent='Buscando…'; results.innerHTML='';
   try {
-    const r=await fetch(`/api/stations?q=${encodeURIComponent(q.trim())}`);
+    const params=new URLSearchParams({q:q.trim()});
+    if (searchOrigin && hasNumber(searchOrigin.lat) && hasNumber(searchOrigin.lon)) {
+      params.set('lat',String(searchOrigin.lat)); params.set('lon',String(searchOrigin.lon));
+    }
+    const r=await fetch(`/api/stations?${params.toString()}`);
     if (!r.ok) throw new Error('No se pudo completar la búsqueda');
     const data=await r.json(); const stations=data.stations||[];
-    status.textContent=stations.length ? `${stations.length} resultados` : 'No encontramos estaciones. Prueba con otra localidad o dirección.';
-    results.innerHTML=stations.map((s,i)=>`<button class="station-result" type="button" data-index="${i}"><strong>${escapeHtml(s.brand||'Estación de servicio')}</strong><span>${escapeHtml([s.address,s.locality||s.municipality,s.province].filter(Boolean).join(' · '))}</span></button>`).join('');
+    status.textContent=stations.length ? `${stations.length} resultados${data.sortedByDistance?' · por cercanía':''}` : 'No encontramos estaciones. Prueba con otra localidad o dirección.';
+    results.innerHTML=stations.map((s,i)=>{
+      const distance=hasNumber(s.distanceKm) ? ` · ${Number(s.distanceKm).toLocaleString('es-ES',{maximumFractionDigits:1})} km` : '';
+      const place=[s.address,s.locality||s.municipality,s.province].filter(Boolean).join(' · ');
+      return `<button class="station-result" type="button" data-index="${i}"><strong>${escapeHtml(s.brand||'Estación de servicio')}</strong><span>${escapeHtml(place)}${escapeHtml(distance)}</span></button>`;
+    }).join('');
     results.querySelectorAll('.station-result').forEach(btn=>btn.addEventListener('click',()=>chooseStation(stations[Number(btn.dataset.index)])));
   } catch(err) { status.textContent=err.message; }
 }
@@ -183,6 +196,7 @@ $('useLocationBtn').addEventListener('click',()=>{
   btn.disabled=true; btn.textContent='Obteniendo ubicación…';
   navigator.geolocation.getCurrentPosition(pos=>{
     const c=getFuelConfig();
+    searchOrigin={lat:pos.coords.latitude,lon:pos.coords.longitude};
     saveFuelConfig({mode:'location',radius:c.radius,lat:pos.coords.latitude,lon:pos.coords.longitude});
     btn.disabled=false; btn.textContent='📍 Usar mi ubicación actual'; $('fuelSettingsDialog').close(); loadData(true);
   },()=>{
