@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Álbumes" />
+  <meta name="description" content="Buscador privado de álbumes" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; base-uri 'none'; object-src 'none'; frame-src 'none';" />
+  <title>Álbumes</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="./icon.svg" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <section id="lockedView" class="locked-view">
+      <div class="lock-card">
+        <div class="lock-icon" aria-hidden="true">🔒</div>
+        <p class="eyebrow">BUSCADOR PRIVADO</p>
+        <h1>Álbumes</h1>
+        <p class="intro">Tus enlaces están cifrados. Introduce la clave para acceder al buscador.</p>
+        <form id="unlockForm" class="unlock-form">
+          <label for="passwordInput">Clave de acceso</label>
+          <div class="password-row">
+            <input id="passwordInput" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" placeholder="Introduce tu clave" />
+            <button id="togglePassword" class="peek-btn" type="button" aria-label="Mostrar u ocultar clave">◉</button>
+          </div>
+          <button id="unlockBtn" class="primary-btn" type="submit">Desbloquear</button>
+          <p id="unlockStatus" class="unlock-status" role="status"></p>
+        </form>
+        <p class="privacy-note">La clave no se envía a ningún servidor ni queda guardada por esta app.</p>
+      </div>
+    </section>
+
+    <section id="appView" class="app-view hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">BUSCADOR PRIVADO</p>
+          <h1>Álbumes</h1>
+          <p id="albumCount" class="subtle">—</p>
+        </div>
+        <button id="lockBtn" class="icon-btn" type="button" aria-label="Bloquear buscador" title="Bloquear">🔒</button>
+      </header>
+
+      <section class="search-card">
+        <div class="search-box">
+          <span class="search-icon" aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Buscar álbum…" />
+          <button id="clearSearch" class="clear-btn hidden" type="button" aria-label="Borrar búsqueda">×</button>
+        </div>
+        <p id="searchMeta" class="search-meta">Escribe el nombre o parte del nombre del álbum.</p>
+      </section>
+
+      <section id="emptyState" class="empty-state">
+        <div class="empty-symbol">▦</div>
+        <strong>Busca entre tus álbumes</strong>
+        <span>Puedes escribir una o varias palabras, en cualquier orden.</span>
+      </section>
+
+      <section id="resultsCard" class="results-card hidden" aria-live="polite">
+        <div id="resultsList" class="results-list"></div>
+      </section>
+
+      <footer>
+        <button id="installBtn" class="install-btn" type="button">Añadir a pantalla de inicio</button>
+        <p>Los datos se descifran únicamente en este dispositivo mientras la app está abierta.</p>
+      </footer>
+    </section>
+  </main>
+
+  <dialog id="iosInstallDialog">
+    <h3>Instalar Álbumes en iPhone o iPad</h3>
+    <p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p>
+    <button id="closeDialog" type="button">Entendido</button>
+  </dialog>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "id": "/albumes/",
+  "name": "Álbumes",
+  "short_name": "Álbumes",
+  "description": "Buscador privado de álbumes",
+  "start_url": "/albumes/",
+  "scope": "/albumes/",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/albumes/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+{"v":2,"kdf":"PBKDF2-SHA256","iterations":250000,"salt":"ixly5OeH+mREh9xU851bXg==","cipher":"AES-256-GCM","iv":"SOLQr9OVZ42C2WDp","aad":"albumes-v2","compression":"gzip","parts":["part-01.txt","part-02.txt","part-03.txt","part-04.txt","part-05.txt","part-06.txt","part-07.txt","part-08.txt","part-09.txt"]}
