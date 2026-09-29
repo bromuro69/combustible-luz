@@ -59,7 +59,7 @@ function renderRecents(){const list=JSON.parse(localStorage.getItem('weatherRece
 function setStatus(text=''){ $('status').textContent=text; $('status').classList.toggle('hidden',!text); }
 function setLoading(on){$('refreshBtn').classList.toggle('loading',on);$('refreshBtn').disabled=on;}
 function placeLabel(p){return p?.name || 'Mi ubicación';}
-function selectPlace(place){ currentPlace={...place}; $('placeIcon').textContent=place.manual?'🔎':'📍'; $('placeName').textContent=placeLabel(place); $('searchPanel').classList.add('hidden'); $('searchInput').value=''; $('searchResults').innerHTML=''; $('aemetAlerts').classList.add('hidden'); saveRecent(place); loadWeather(place); }
+function selectPlace(place){ alertsRequestId++; currentPlace={...place}; $('placeIcon').textContent=place.manual?'🔎':'📍'; $('placeName').textContent=placeLabel(place); $('searchPanel').classList.add('hidden'); $('searchInput').value=''; $('searchResults').innerHTML=''; $('aemetAlerts').classList.add('hidden'); $('outlookText').textContent='Preparando el resumen…'; saveRecent(place); loadWeather(place); }
 
 async function getForecast(place){
   const q=new URLSearchParams({latitude:place.latitude,longitude:place.longitude,timezone:'auto',forecast_days:'7',current:'temperature_2m,apparent_temperature,is_day,weather_code,cloud_cover,wind_speed_10m,precipitation',hourly:'temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,is_day,wind_speed_10m,cloud_cover',daily:'weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max'});
@@ -105,15 +105,48 @@ function renderAlerts(data){
   }).join('');
   card.classList.remove('hidden');
 }
-async function loadAlerts(place){
+async function loadAlerts(place,forecast){
   const requestId=++alertsRequestId;
   try{
     const data=await getAlerts(place);
     if(requestId!==alertsRequestId)return;
     renderAlerts(data);
+    renderOutlook(forecast,data.alerts);
   }catch{
-    if(requestId===alertsRequestId)$('aemetAlerts').classList.add('hidden');
+    if(requestId===alertsRequestId){$('aemetAlerts').classList.add('hidden');renderOutlook(forecast);}
   }
+}
+
+function renderOutlook(data,alerts=[]){
+  const h=data.hourly||{},times=h.time||[];
+  const start=Math.max(0,times.findIndex(t=>t>=data.current?.time));
+  const hours=times.slice(start,start+24).map((time,j)=>{
+    const i=start+j,prob=h.precipitation_probability?.[i],temp=h.temperature_2m?.[i],wind=h.wind_speed_10m?.[i];
+    return {time,prob:prob==null?null:Number(prob),temp:temp==null?null:Number(temp),wind:wind==null?null:Number(wind),mm:Number(h.precipitation?.[i])||0};
+  });
+  const el=$('outlookText');
+  if(!hours.length){el.textContent='Todavía no hay datos suficientes para resumir las próximas 24 horas.';return;}
+  const end=new Date(Date.now()+24*60*60*1000);
+  const relevant=(Array.isArray(alerts)?alerts:[]).filter(a=>(!a.onset||new Date(a.onset)<=end)&&(!a.expires||new Date(a.expires)>=new Date()));
+  if(relevant.length){el.textContent='AEMET tiene avisos para esta zona en las próximas 24 horas. Echa un vistazo a los detalles antes de hacer planes.';return;}
+  const rain=hours.filter(x=>Number.isFinite(x.prob)).reduce((best,x)=>!best||x.prob>best.prob?x:best,null);
+  const temps=hours.map(x=>x.temp).filter(Number.isFinite);
+  const winds=hours.map(x=>x.wind).filter(Number.isFinite);
+  const maxWind=winds.length?Math.max(...winds):null;
+  const minTemp=temps.length?Math.round(Math.min(...temps)):null,maxTemp=temps.length?Math.round(Math.max(...temps)):null;
+  const totalRain=hours.reduce((sum,x)=>sum+Math.max(0,x.mm),0);
+  let first;
+  if(rain?.prob>=75)first=`Pinta que el paraguas va a venir bien: alta probabilidad de lluvia hacia las ${hourOf(rain.time)}.`;
+  else if(rain?.prob>=45)first=`Ojo al cielo: hay probabilidad de lluvia hacia las ${hourOf(rain.time)}.`;
+  else if(rain?.prob>=30)first=`El cielo deja alguna duda: probabilidad baja de lluvia hacia las ${hourOf(rain.time)}.`;
+  else if(totalRain>=0.1)first='Podría caer alguna gota, aunque la probabilidad de lluvia es baja.';
+  else if(maxWind>=45)first='El viento puede ser el protagonista de las próximas 24 horas.';
+  else first='Las próximas 24 horas vienen bastante tranquilas.';
+  let second='';
+  if(maxWind>=45&&rain?.prob>=30)second=`También se espera viento de hasta ${fmt(maxWind)} km/h.`;
+  else if(minTemp!==null&&maxTemp!==null)second=minTemp===maxTemp?`Temperatura alrededor de ${minTemp} °C.`:`Temperaturas previstas entre ${minTemp} y ${maxTemp} °C.`;
+  else if(maxWind>=30&&maxWind<45)second=`Puede soplar viento de hasta ${fmt(maxWind)} km/h.`;
+  el.textContent=`${first} ${second}`.trim();
 }
 
 function renderMain(data){
@@ -206,7 +239,7 @@ function updateRainConfidence(models){
 async function loadWeather(place=currentPlace){
   if(!place)return; setLoading(true); setStatus(''); $('weatherContent').classList.remove('hidden');
   try{
-    const main=await getForecast(place); renderMain(main); loadAlerts(place);
+    const main=await getForecast(place); renderMain(main); renderOutlook(main); loadAlerts(place,main);
     const models=await Promise.allSettled(['ecmwf','dwd-icon','gfs'].map(e=>getModel(e,place)));
     updateRainConfidence(models);
     $('lastUpdated').textContent=`Actualizado ${new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}`;
