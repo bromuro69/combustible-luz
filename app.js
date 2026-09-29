@@ -160,20 +160,30 @@ function renderMain(data){
 function renderRain(data,nowIndex){
   const h=data.hourly||{};
   const end=Math.min(nowIndex+24,(h.time||[]).length);
-  const probs=(h.precipitation_probability||[]).slice(nowIndex,end).map(v=>Number(v)||0);
   const times=(h.time||[]).slice(nowIndex,end);
-  const peak=Math.max(0,...probs);
-  const first20=probs.findIndex(p=>p>=20);
-  const first40=probs.findIndex(p=>p>=40);
-
-  if(peak<20){
-    $('rainHeadline').textContent='Sin lluvia prevista en las próximas 24 h';
-  }else if(peak<40){
-    $('rainHeadline').textContent=`Baja posibilidad de lluvia desde las ${hourOf(times[first20])}`;
-  }else{
-    $('rainHeadline').textContent=`Lluvia probable desde las ${hourOf(times[first40])}`;
+  const probs=times.map((_,i)=>{
+    const raw=h.precipitation_probability?.[nowIndex+i];
+    return raw===null||raw===undefined?null:Number(raw);
+  });
+  const valid=probs.map((p,i)=>({p,i})).filter(x=>Number.isFinite(x.p));
+  if(!valid.length){
+    $('rainHeadline').textContent='Previsión de lluvia no disponible';
+    $('rainDetail').textContent='Vuelve a actualizar para consultar las próximas 24 h.';
+    return;
   }
-  $('rainDetail').textContent=`Probabilidad máxima aproximada: ${fmt(peak)} %.`;
+  const {p:peak,i:peakIndex}=valid.reduce((best,x)=>x.p>best.p?x:best);
+  const amounts=times.map((_,i)=>Math.max(0,Number(h.precipitation?.[nowIndex+i])||0));
+  const total=amounts.reduce((sum,mm)=>sum+mm,0);
+  const peakMm=amounts[peakIndex];
+  const hour=hourOf(times[peakIndex]);
+  let headline;
+  if(peak<30)headline=total<0.1?'Sin lluvia prevista en las próximas 24 h':`Lluvia poco probable hacia las ${hour}`;
+  else if(peak<45)headline=`Probabilidad baja de lluvia hacia las ${hour}`;
+  else if(peak<75)headline=`Probabilidad de lluvia hacia las ${hour}`;
+  else headline=`Alta probabilidad de lluvia hacia las ${hour}`;
+  $('rainHeadline').textContent=headline;
+  const amount=peakMm>0?` · ${fmt(peakMm,peakMm<0.1?2:1)} mm previstos en esa hora`:total>=0.1?` · ${fmt(total,total<1?2:1)} mm previstos en 24 h`:'';
+  $('rainDetail').textContent=`Probabilidad máxima: ${fmt(peak)} % a las ${hour}${amount}.`;
 }
 
 function updateRainConfidence(models){
