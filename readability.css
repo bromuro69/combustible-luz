@@ -1,48 +1,75 @@
-/* Ajustes de legibilidad para móvil sin alterar la jerarquía visual principal */
-.eyebrow,.card-label,.mini-label{font-size:11.5px}
-.subtle{font-size:14.5px}
-.place-btn{font-size:16.5px}
-.search-box input{font-size:16.5px}
-.stats-grid span{font-size:12.5px}
-.stats-grid strong{font-size:16.5px}
-.confidence{font-size:11.5px}
-.hour-card .time{font-size:11.5px}
-.hour-card .feels{font-size:11px;margin-top:4px}
-.hour-card .rain{font-size:11px;margin-top:6px}
-.hour-card .rain-mm{font-size:10px;margin-top:7px}
-.rain-inline .card-label{font-size:10.5px}
-.rain-inline .subtle{font-size:13.5px;margin-top:3px}
-.day-row .day{font-size:16px}
-.day-row .date{font-size:12.5px}
-.day-metrics{font-size:13.5px;line-height:1.35}
-.temps strong{font-size:21px}
-.temps .min{font-size:17px}
-.source-note{font-size:11.5px}
-.status{font-size:14.5px}
-.outlook-text{font-size:16.5px}
+/* Legibilidad reforzada para iPhone y pantallas móviles */
+.eyebrow,.card-label,.mini-label{font-size:12.5px}
+.subtle{font-size:15.5px}
+.place-btn{font-size:17px}
+.search-box input{font-size:17px}
+.stats-grid span{font-size:13.5px}
+.stats-grid strong{font-size:17.5px}
+.confidence{font-size:12px}
+.hour-card .time{font-size:12.5px}
+.hour-card .feels{font-size:12px;margin-top:5px}
+.hour-card .rain{font-size:12px;margin-top:7px}
+.hour-card .rain-mm{font-size:11.5px;margin-top:8px}
+.rain-inline .card-label{font-size:11.5px}
+.rain-inline .subtle{font-size:14.5px;margin-top:4px}
+.source-note{font-size:12.5px}
+.status{font-size:15.5px}
+.outlook-text{font-size:17px;line-height:1.55}
+
+/* 7 días: diseño en dos niveles para permitir texto realmente grande */
+.daily-list{border-radius:16px}
+.day-row{
+  grid-template-columns:minmax(0,1fr) 42px auto;
+  grid-template-areas:
+    "main icon temps"
+    "metrics metrics metrics";
+  column-gap:12px;
+  row-gap:11px;
+  padding:15px 13px;
+  min-height:100px;
+}
+.day-main{grid-area:main;gap:4px}
+.day-icon{grid-area:icon;font-size:30px}
+.day-metrics{grid-area:metrics;font-size:14.5px;line-height:1.4;gap:8px 18px;flex-wrap:wrap}
+.temps{grid-area:temps;gap:7px}
+.day-row .day{font-size:18px;line-height:1.15}
+.day-row .date{font-size:13px;line-height:1.2}
+.temps strong{font-size:22px}
+.temps .min{font-size:18px}
 
 @media(max-width:600px){
-  .stats-grid strong{font-size:16px}
-  .hour-card{flex-basis:74px}
-  .daily-list{border-radius:16px}
-  .day-row{grid-template-columns:70px 34px minmax(0,1fr) auto;gap:9px;padding:13px 11px;min-height:78px}
+  .card-label,.eyebrow,.mini-label{font-size:12px}
+  .subtle{font-size:15px}
+  .stats-grid span{font-size:13px}
+  .stats-grid strong{font-size:17px}
+  .hour-card{flex-basis:78px;padding-top:10px;padding-bottom:10px}
+  .hour-card strong{font-size:18px}
+  .outlook-text{font-size:16.5px;line-height:1.55}
+
+  .day-row{
+    grid-template-columns:minmax(0,1fr) 40px auto;
+    grid-template-areas:
+      "main icon temps"
+      "metrics metrics metrics";
+    gap:10px 11px;
+    padding:15px 12px;
+    min-height:100px;
+  }
   .day-main{gap:4px}
-  .day-row .day{font-size:16px;line-height:1.15}
-  .day-row .date{font-size:12px;line-height:1.15}
-  .day-icon{font-size:25px}
-  .day-metrics{font-size:12.5px;gap:7px 12px;line-height:1.35}
-  .temps{gap:6px}
-  .temps strong{font-size:20px}
-  .temps .min{font-size:16px}
-  .outlook-text{font-size:15.5px;line-height:1.5}
+  .day-row .day{font-size:18px}
+  .day-row .date{font-size:13px}
+  .day-icon{font-size:29px}
+  .day-metrics{font-size:14px;gap:8px 16px;line-height:1.4}
+  .temps strong{font-size:22px}
+  .temps .min{font-size:18px}
 }
 
 @media(max-width:380px){
-  .hour-card{flex-basis:72px}
-  .day-row{grid-template-columns:64px 30px minmax(0,1fr) auto;gap:7px;padding:12px 9px;min-height:76px}
-  .day-row .day{font-size:15.5px}
-  .day-row .date{font-size:11.5px}
-  .day-metrics{font-size:12px;gap:6px 9px}
-  .temps strong{font-size:19px}
-  .temps .min{font-size:15px}
+  .hour-card{flex-basis:76px}
+  .day-row{padding:14px 10px;min-height:98px}
+  .day-row .day{font-size:17px}
+  .day-row .date{font-size:12.5px}
+  .day-metrics{font-size:13.5px;gap:7px 13px}
+  .temps strong{font-size:21px}
+  .temps .min{font-size:17px}
 }
