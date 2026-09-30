@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#07111f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Tiempo" />
-  <title>Tiempo</title>
+  <meta name="apple-mobile-web-app-title" content="Huracán" />
+  <title>Huracán</title>
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/icon.svg" />
   <link rel="stylesheet" href="/styles.css" />
@@ -16,7 +16,8 @@
   <style>
     .title-row{display:flex;align-items:center;gap:10px}
     .title-cloud{width:46px;height:46px;flex:0 0 46px;display:block;object-fit:contain}
-    @media(max-width:480px){.title-cloud{width:42px;height:42px;flex-basis:42px}}
+    .app-credit{text-align:center;margin:10px 0 calc(2px + env(safe-area-inset-bottom));font-size:11px;letter-spacing:.02em;color:rgba(238,246,255,.48)}
+    @media(max-width:480px){.title-cloud{width:42px;height:42px;flex-basis:42px}.app-credit{font-size:10.5px}}
   </style>
 </head>
 <body>
@@ -24,7 +25,7 @@
     <header class="topbar">
       <div>
         <p class="eyebrow">PREVISIÓN METEOROLÓGICA</p>
-        <div class="title-row"><img class="title-cloud" src="/title-cloud.png?v=1" alt="" aria-hidden="true" /><h1>Tiempo</h1></div>
+        <div class="title-row"><img class="title-cloud" src="/title-cloud.png?v=1" alt="" aria-hidden="true" /><h1>Huracán</h1></div>
         <button id="placeBtn" class="place-btn" type="button"><span id="placeIcon">📍</span> <span id="placeName">Localizando…</span> <span class="chevron">⌄</span></button>
       </div>
       <div class="top-actions">
@@ -95,9 +96,10 @@
     <footer>
       <button id="installBtn" class="install-btn" type="button">Añadir a pantalla de inicio</button>
     </footer>
+    <p class="app-credit">by Aitor Martínez</p>
   </main>
 
-  <dialog id="iosInstallDialog"><h3>Instalar Tiempo</h3><p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p><button id="closeDialog" type="button">Entendido</button></dialog>
+  <dialog id="iosInstallDialog"><h3>Instalar Huracán</h3><p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p><button id="closeDialog" type="button">Entendido</button></dialog>
   <script src="/smart-client.js" defer></script>
   <script src="/app.js" defer></script>
 </body>
