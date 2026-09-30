@@ -1,7 +1,7 @@
 {
-  "name": "Energías",
-  "short_name": "Energías",
-  "description": "Precios de combustible en Gijón, PVPC de la luz y tarifa regulada de gas natural.",
+  "name": "Evolta",
+  "short_name": "Evolta",
+  "description": "Precios de combustible, PVPC de la luz y tarifa regulada de gas natural.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#070b14",
