@@ -1,4 +1,4 @@
-const CACHE='tiempo-shell-v13';
+const CACHE='tiempo-shell-v14';
 const SHELL=['/','/index.html','/styles.css','/alerts.css','/readability.css','/app.js','/smart-client.js','/manifest.webmanifest','/icon.svg','/title-cloud.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));
