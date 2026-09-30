@@ -1,6 +1,6 @@
 {
-  "name": "Tiempo",
-  "short_name": "Tiempo",
+  "name": "Huracán",
+  "short_name": "Huracán",
   "description": "Previsión meteorológica con ubicación, búsqueda y consenso entre modelos.",
   "start_url": "/",
   "display": "standalone",
