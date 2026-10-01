@@ -1,4 +1,4 @@
-const CACHE='evolta-shell-v18';
+const CACHE='evolta-shell-v20';
 const SHELL=['/','/index.html','/styles.css?v=18','/settings.css?v=18','/app.js?v=18','/manifest.webmanifest','/icon.svg','/icon-180.png','/icon-192.png','/evolta-wordmark-header-v3.png?v=18'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(Promise.all([
