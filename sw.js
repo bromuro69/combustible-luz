@@ -1,4 +1,4 @@
-const CACHE='tiempo-shell-v20';
+const CACHE='tiempo-shell-v21';
 const SHELL=['/','/index.html','/styles.css','/alerts.css','/readability.css','/app.js','/smart-client.js','/location-name.js','/manifest.webmanifest','/huracan-tornado-icon-180.png','/huracan-tornado-icon-192.png','/huracan-tornado-icon-512.png','/huracan-tornado-header.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));
