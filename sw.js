@@ -1,5 +1,5 @@
-const CACHE='evolta-shell-v15';
-const SHELL=['/','/index.html','/styles.css','/settings.css','/app.js','/manifest.webmanifest','/icon.svg','/icon-180.png','/icon-192.png','/evolta-wordmark-v2.webp'];
+const CACHE='evolta-shell-v16';
+const SHELL=['/','/index.html','/styles.css?v=16','/settings.css?v=16','/app.js?v=16','/manifest.webmanifest','/icon.svg','/icon-180.png','/icon-192.png'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(Promise.all([
   caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))),
@@ -7,6 +7,11 @@ self.addEventListener('activate', e => e.waitUntil(Promise.all([
 ])));
 self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
+  if (u.origin !== self.location.origin) return;
   if (u.pathname.startsWith('/api/')) return;
-  e.respondWith(fetch(e.request).then(r => { const copy=r.clone(); caches.open(CACHE).then(c=>c.put(e.request, copy)); return r; }).catch(()=>caches.match(e.request)));
+  e.respondWith(fetch(e.request, {cache:'no-store'}).then(r => {
+    const copy=r.clone();
+    caches.open(CACHE).then(c=>c.put(e.request, copy));
+    return r;
+  }).catch(()=>caches.match(e.request)));
 });
