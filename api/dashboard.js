@@ -7,15 +7,15 @@ const PRODUCTS = { g95: '1', g98: '3', diesel: '4' };
 const EASYGAS_ID = '886';
 
 const GAS_TUR = {
-  periodLabel: 'Vigente · 1 jul–30 sep 2026',
-  validFrom: '2026-07-01',
-  validUntil: '2026-09-30',
-  source: 'BOE-A-2026-14233',
-  sourceUrl: 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-14233',
+  periodLabel: 'Vigente · 1 oct–31 dic 2026',
+  validFrom: '2026-10-01',
+  validUntil: '2026-12-31',
+  source: 'BOE-A-2026-20389',
+  sourceUrl: 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20389',
   tariffs: [
-    { id: 'TUR.1', consumption: '≤ 5.000 kWh/año', fixedMonthly: 3.93, variablePerKwh: 0.04329798 },
-    { id: 'TUR.2', consumption: '> 5.000 y ≤ 15.000 kWh/año', fixedMonthly: 8.11, variablePerKwh: 0.04119908 },
-    { id: 'TUR.3', consumption: '> 15.000 y ≤ 50.000 kWh/año', fixedMonthly: 18.82, variablePerKwh: 0.03775844 }
+    { id: 'TUR.1', consumption: '≤ 5.000 kWh/año', fixedMonthly: 3.83, variablePerKwh: 0.05252590 },
+    { id: 'TUR.2', consumption: '> 5.000 y ≤ 15.000 kWh/año', fixedMonthly: 8.17, variablePerKwh: 0.05042762 },
+    { id: 'TUR.3', consumption: '> 15.000 y ≤ 50.000 kWh/año', fixedMonthly: 19.32, variablePerKwh: 0.04698799 }
   ]
 };
 
