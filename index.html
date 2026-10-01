@@ -11,8 +11,8 @@
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
-  <link rel="stylesheet" href="/styles.css" />
-  <link rel="stylesheet" href="/settings.css" />
+  <link rel="stylesheet" href="/styles.css?v=16" />
+  <link rel="stylesheet" href="/settings.css?v=16" />
 </head>
 <body>
   <main class="app-shell">
@@ -20,8 +20,8 @@
       <div class="brand-lockup brand-lockup-wordmark">
         <p class="eyebrow">PRECIOS DE ENERGÍA</p>
         <div class="brand-wordmark-frame">
-          <img class="brand-wordmark" src="/evolta-wordmark-v2.webp" alt="Evolta" width="480" height="160" onerror="this.hidden=true;this.nextElementSibling.hidden=false" />
-          <span class="brand-wordmark-fallback" hidden style="font-size:36px;font-weight:800;letter-spacing:-.04em;line-height:1">Evolta</span>
+          <img class="brand-wordmark" src="https://raw.githubusercontent.com/bromuro69/combustible-luz/main/evolta-wordmark-v2.webp?v=16" alt="Evolta" width="480" height="160" decoding="async" fetchpriority="high" onerror="this.style.display='none';this.nextElementSibling.hidden=false" />
+          <span class="brand-wordmark-fallback" hidden>Evolta</span>
         </div>
       </div>
       <div class="top-actions">
@@ -172,6 +172,6 @@
     <button id="closeDialog" type="button">Entendido</button>
   </dialog>
 
-  <script src="/app.js" defer></script>
+  <script src="/app.js?v=16" defer></script>
 </body>
 </html>
