@@ -1,5 +1,5 @@
-const CACHE='tiempo-shell-v22';
-const SHELL=['/','/index.html','/styles.css','/alerts.css','/readability.css','/app.js?v=3','/smart-client.js?v=3','/location-name.js','/manifest.webmanifest','/huracan-tornado-icon-180.png','/huracan-tornado-icon-192.png','/huracan-tornado-icon-512.png','/huracan-transparent-header-256.png'];
+const CACHE='tiempo-shell-v23';
+const SHELL=['/','/index.html','/styles.css','/alerts.css','/readability.css','/app.js?v=3','/smart-client.js?v=3','/meteoblue-client.js?v=1','/location-name.js','/manifest.webmanifest','/huracan-tornado-icon-180.png','/huracan-tornado-icon-192.png','/huracan-tornado-icon-512.png','/huracan-transparent-header-256.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(Promise.all([caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))),self.clients.claim()])));
 self.addEventListener('fetch',e=>{const u=new URL(e.request.url);if(u.origin!==location.origin)return;e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r;}).catch(()=>caches.match(e.request)));});
