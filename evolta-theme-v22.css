@@ -148,8 +148,21 @@ dialog::backdrop{background:rgba(8,8,7,.78)!important}
 .source-link{color:#efb96f!important}
 .status{background:rgba(86,34,28,.42)!important}
 
+/* iPhone: mantener toda la cabecera fuera de la franja superior translúcida */
 @media(max-width:600px){
+  .app-shell{
+    padding-top:calc(env(safe-area-inset-top, 0px) + 34px)!important;
+  }
+  .topbar{
+    margin-top:0!important;
+    margin-bottom:18px!important;
+  }
   .tab{gap:5px!important}
   .tab-icon{width:16px;height:16px}
   .distance-pill{padding:6px 9px!important}
+}
+@media(max-width:600px) and (display-mode:standalone){
+  .app-shell{
+    padding-top:calc(env(safe-area-inset-top, 0px) + 38px)!important;
+  }
 }
