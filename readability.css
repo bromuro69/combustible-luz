@@ -16,8 +16,8 @@
 .status{font-size:15.5px}
 .outlook-text{font-size:17px;line-height:1.55}
 
-/* Mismo criterio de margen superior que la app Energías */
-.app-shell{padding-top:max(24px,env(safe-area-inset-top))}
+/* Margen superior afinado para iPhone: safe area + 20 px */
+.app-shell{padding-top:calc(env(safe-area-inset-top) + 20px)}
 
 /* 7 días: diseño en dos niveles para permitir texto realmente grande */
 .daily-list{border-radius:16px}
@@ -41,7 +41,7 @@
 .temps .min{font-size:18px}
 
 @media(max-width:600px){
-  .app-shell{padding-top:max(14px,env(safe-area-inset-top))}
+  .app-shell{padding-top:calc(env(safe-area-inset-top) + 20px)}
   .card-label,.eyebrow,.mini-label{font-size:12px}
   .subtle{font-size:15px}
   .stats-grid span{font-size:13px}
