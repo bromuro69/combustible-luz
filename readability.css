@@ -16,8 +16,10 @@
 .status{font-size:15.5px}
 .outlook-text{font-size:17px;line-height:1.55}
 
-/* Más aire en la parte superior, respetando la zona segura de iPhone/iPad */
-.app-shell{padding-top:max(28px,calc(env(safe-area-inset-top) + 10px))}
+/* Más aire en la parte superior, respetando la zona segura de iPhone/iPad.
+   Esta hoja se carga después de styles.css, por lo que debe conservar aquí
+   el margen definitivo para no sobrescribirlo. */
+.app-shell{padding-top:calc(env(safe-area-inset-top) + 62px)}
 
 /* 7 días: diseño en dos niveles para permitir texto realmente grande */
 .daily-list{border-radius:16px}
