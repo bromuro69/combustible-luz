@@ -11,7 +11,7 @@
   <link rel="manifest" href="/manifest.webmanifest?v=4" />
   <link rel="apple-touch-icon" sizes="180x180" href="/huracan-tornado-icon-180.png?v=4" />
   <link rel="icon" type="image/png" sizes="192x192" href="/huracan-tornado-icon-192.png?v=4" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="/styles.css?v=6" />
   <link rel="stylesheet" href="/alerts.css" />
   <link rel="stylesheet" href="/readability.css" />
   <style>
@@ -26,7 +26,7 @@
 <body>
   <main class="app-shell">
     <header class="topbar"><div class="brand-block"><p class="eyebrow">PREVISIÓN METEOROLÓGICA</p><div class="title-row"><img class="title-cloud" src="/huracan-transparent-header-256.png?v=5" alt="Icono de Huracán" /><h1>Huracán</h1></div><button id="placeBtn" class="place-btn" type="button"><span id="placeIcon">📍</span> <span id="placeName">Localizando…</span> <span class="chevron">⌄</span></button></div><div class="top-actions"><span id="lastUpdated" class="update-time">—</span><button id="refreshBtn" class="icon-btn" type="button" aria-label="Actualizar">↻</button></div></header>
-    <section id="searchPanel" class="search-panel hidden"><div class="search-box"><span>⌕</span><input id="searchInput" type="search" autocomplete="off" placeholder="Buscar ciudad o lugar…" /></div><button id="myLocationBtn" class="location-row" type="button">📍 <span><strong>Mi ubicación</strong><small>Usar la posición del dispositivo</small></span></button><div id="searchResults" class="search-results"></div><div id="recentWrap" class="recent-wrap hidden"><p class="mini-label">RECIENTES</p><div id="recentList"></div></div></section>
+    <section id="searchPanel" class="search-panel hidden"><div class="search-box"><span>⌕</span><input id="searchInput" type="search" autocomplete="off" placeholder="Buscar ciudad o lugar…" /></div><button id="myLocationBtn" class="location-row" type="button">📍 <span><strong>Mi ubicación</strong><small>Usar la posición del dispositivo</small></span></button><div id="searchResults" class="search-results"></div><div id="recentWrap" class="recent-wrap hidden"><p class="mini-label">RECIENTES</p><div id="recentList" class="recent-list"></div></div></section>
     <section id="status" class="status hidden" role="status"></section>
     <section id="weatherContent" class="content hidden">
       <article class="card hero-card"><div class="hero-top"><div><span class="card-label">AHORA</span><div class="temperature"><strong id="currentTemp">—</strong><span>°</span></div><p id="currentText" class="condition">—</p><p id="feelsLike" class="subtle">Sensación —</p></div><div id="currentIcon" class="weather-icon">☁️</div></div><div class="stats-grid"><div><span>💧 Lluvia</span><strong id="currentRain">—</strong></div><div><span>💨 Viento</span><strong id="currentWind">—</strong></div><div><span>☁️ Nubes</span><strong id="currentCloud">—</strong></div></div></article>
