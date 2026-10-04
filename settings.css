@@ -1,8 +1,8 @@
-@import url('/settings-base-v18.css?v=21');
+@import url('./settings-base-v18.css?v=21');
 
-/* Evolta v21: logo robusto. El PNG antiguo queda oculto y la E limpia se carga como fondo independiente, sin recortes ni deformaciones. */
+/* Evolta Pages: logo robusto, sin deformación ni recortes. */
 .brand-wordmark-frame{display:flex!important;align-items:center!important;justify-content:flex-start!important;width:auto!important;max-width:100%!important;height:58px!important;min-height:58px!important;overflow:visible!important;gap:2px!important;border:0!important;background:transparent!important}
 .brand-wordmark{display:none!important}
-.brand-wordmark-frame::before{content:'';display:block;flex:0 0 58px;width:58px;height:58px;background:url('/evolta-e-clean-v21.png') left center/contain no-repeat;filter:drop-shadow(0 7px 16px rgba(0,0,0,.18))}
+.brand-wordmark-frame::before{content:'';display:block;flex:0 0 58px;width:58px;height:58px;background:url('./evolta-e-clean-v21.png') left center/contain no-repeat;filter:drop-shadow(0 7px 16px rgba(0,0,0,.18))}
 .brand-wordmark-frame::after{content:'volta';display:block;color:#fff;font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;font-size:52px;font-weight:800;letter-spacing:-.065em;line-height:.92;margin-left:-2px;white-space:nowrap;text-shadow:0 8px 20px rgba(0,0,0,.22)}
 @media(max-width:600px){.brand-wordmark-frame{height:50px!important;min-height:50px!important;gap:1px!important}.brand-wordmark-frame::before{flex-basis:50px;width:50px;height:50px}.brand-wordmark-frame::after{font-size:44px;letter-spacing:-.065em;line-height:.94;margin-left:-2px}}
