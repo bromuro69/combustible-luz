@@ -8,12 +8,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Evolta" />
   <title>Evolta</title>
-  <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
-  <link rel="preload" as="image" href="/evolta-wordmark-header-v3.png?v=18" fetchpriority="high" />
-  <link rel="stylesheet" href="/styles.css?v=18" />
-  <link rel="stylesheet" href="/settings.css?v=18" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png" />
+  <link rel="stylesheet" href="./styles.css?v=pages21" />
+  <link rel="stylesheet" href="./settings.css?v=pages21" />
 </head>
 <body>
   <main class="app-shell">
@@ -21,7 +20,7 @@
       <div class="brand-lockup brand-lockup-wordmark">
         <p class="eyebrow">PRECIOS DE ENERGÍA</p>
         <div class="brand-wordmark-frame" aria-label="Evolta">
-          <img class="brand-wordmark" src="/evolta-wordmark-header-v3.png?v=18" alt="Evolta" width="640" height="213" decoding="sync" fetchpriority="high" />
+          <img class="brand-wordmark" src="./evolta-wordmark-header-v3.png" alt="" aria-hidden="true" />
         </div>
       </div>
       <div class="top-actions">
@@ -56,81 +55,27 @@
       </article>
 
       <article class="card">
-        <div class="section-head">
-          <div>
-            <span id="cheapestRadiusLabel" class="card-label">MÁS BARATO A 10 KM</span>
-            <h2>Mejor precio por combustible</h2>
-          </div>
-        </div>
+        <div class="section-head"><div><span id="cheapestRadiusLabel" class="card-label">MÁS BARATO A 10 KM</span><h2>Mejor precio por combustible</h2></div></div>
         <div id="cheapestFuel" class="fuel-stack"></div>
       </article>
-
       <p class="source-note">Combustible: Geoportal de precios de carburantes del Ministerio para la Transición Ecológica / servicio REST oficial. Los precios los comunican las estaciones de servicio.</p>
     </section>
 
     <section id="electricity" class="panel" aria-label="Luz">
       <div class="hero-grid">
-        <article class="card hero-card">
-          <span class="card-label">AHORA</span>
-          <div class="hero-value-row">
-            <span id="currentDot" class="dot"></span>
-            <strong id="currentPrice" class="hero-value">—</strong>
-            <span class="unit">€/kWh</span>
-          </div>
-          <p id="currentHour" class="subtle">—</p>
-        </article>
-
-        <article class="card hero-card">
-          <span class="card-label">PRÓXIMA HORA BARATA</span>
-          <strong id="nextCheapHour" class="hero-value">—</strong>
-          <p id="nextCheapPrice" class="subtle">—</p>
-        </article>
+        <article class="card hero-card"><span class="card-label">AHORA</span><div class="hero-value-row"><span id="currentDot" class="dot"></span><strong id="currentPrice" class="hero-value">—</strong><span class="unit">€/kWh</span></div><p id="currentHour" class="subtle">—</p></article>
+        <article class="card hero-card"><span class="card-label">PRÓXIMA HORA BARATA</span><strong id="nextCheapHour" class="hero-value">—</strong><p id="nextCheapPrice" class="subtle">—</p></article>
       </div>
-
-      <article class="card price-highlight-card best-card">
-        <div class="section-head"><div><span class="card-label">TOP 3 DE HOY</span><h2>Mejores horas</h2></div></div>
-        <div id="top3" class="top3"></div>
-      </article>
-
-      <article class="card price-highlight-card worst-card">
-        <div class="section-head"><div><span class="card-label">TOP 3 MÁS CARAS</span><h2>Peores horas</h2></div></div>
-        <div id="worst3" class="top3"></div>
-      </article>
-
-      <article class="card">
-        <div class="section-head"><div><span class="card-label">ORDEN HORARIO</span><h2>Precio por hora</h2></div></div>
-        <div id="hourlyChart" class="mini-chart" aria-label="Gráfico horario de precio"></div>
-        <div id="hourlyList" class="price-list"></div>
-      </article>
-
-      <article class="card">
-        <div class="section-head">
-          <div><span class="card-label">DE MENOR A MAYOR</span><h2>Las 24 horas</h2></div>
-          <div class="legend" aria-label="Leyenda de precios"><span>🟢 8 baratas</span><span>🟠 8 medias</span><span>🔴 8 caras</span></div>
-        </div>
-        <div id="rankingList" class="price-list"></div>
-      </article>
-
+      <article class="card price-highlight-card best-card"><div class="section-head"><div><span class="card-label">TOP 3 DE HOY</span><h2>Mejores horas</h2></div></div><div id="top3" class="top3"></div></article>
+      <article class="card price-highlight-card worst-card"><div class="section-head"><div><span class="card-label">TOP 3 MÁS CARAS</span><h2>Peores horas</h2></div></div><div id="worst3" class="top3"></div></article>
+      <article class="card"><div class="section-head"><div><span class="card-label">ORDEN HORARIO</span><h2>Precio por hora</h2></div></div><div id="hourlyChart" class="mini-chart" aria-label="Gráfico horario de precio"></div><div id="hourlyList" class="price-list"></div></article>
+      <article class="card"><div class="section-head"><div><span class="card-label">DE MENOR A MAYOR</span><h2>Las 24 horas</h2></div><div class="legend" aria-label="Leyenda de precios"><span>🟢 8 baratas</span><span>🟠 8 medias</span><span>🔴 8 caras</span></div></div><div id="rankingList" class="price-list"></div></article>
       <p class="source-note">PVPC: datos de PreciLuz a partir de Red Eléctrica de España (REE/ESIOS). El precio mostrado corresponde al término horario de energía; la factura final puede incluir otros conceptos e impuestos.</p>
     </section>
 
     <section id="gas" class="panel" aria-label="Gas natural">
-      <article class="card">
-        <div class="section-head">
-          <div><span class="card-label">GAS NATURAL REGULADO</span><h2>Tarifa de Último Recurso</h2></div>
-          <span id="gasPeriod" class="badge">—</span>
-        </div>
-        <div id="gasNotice" class="gas-notice hidden"></div>
-        <div id="gasGrid" class="gas-grid"></div>
-      </article>
-
-      <article class="card gas-help">
-        <span class="card-label">CÓMO LEERLO</span>
-        <h2>Tu TUR depende del consumo anual</h2>
-        <p><strong>TUR.1</strong> hasta 5.000 kWh/año · <strong>TUR.2</strong> de 5.000 a 15.000 · <strong>TUR.3</strong> de 15.000 a 50.000.</p>
-        <p>El término variable se aplica a cada kWh consumido y el término fijo se cobra cada mes.</p>
-      </article>
-
+      <article class="card"><div class="section-head"><div><span class="card-label">GAS NATURAL REGULADO</span><h2>Tarifa de Último Recurso</h2></div><span id="gasPeriod" class="badge">—</span></div><div id="gasNotice" class="gas-notice hidden"></div><div id="gasGrid" class="gas-grid"></div></article>
+      <article class="card gas-help"><span class="card-label">CÓMO LEERLO</span><h2>Tu TUR depende del consumo anual</h2><p><strong>TUR.1</strong> hasta 5.000 kWh/año · <strong>TUR.2</strong> de 5.000 a 15.000 · <strong>TUR.3</strong> de 15.000 a 50.000.</p><p>El término variable se aplica a cada kWh consumido y el término fijo se cobra cada mes.</p></article>
       <p class="source-note">Gas natural: TUR oficial publicada en el BOE. Los importes mostrados son los términos fijo y variable; la factura final puede incluir impuestos, alquiler de contador y otros conceptos. <a id="gasSourceLink" class="source-link hidden" href="#" target="_blank" rel="noopener noreferrer">Ver publicación oficial</a></p>
     </section>
 
@@ -142,36 +87,34 @@
   </main>
 
   <dialog id="fuelSettingsDialog" class="settings-dialog">
-    <div class="dialog-head">
-      <div><span class="card-label">COMBUSTIBLE</span><h3>Configurar referencia</h3></div>
-      <button id="closeFuelSettings" class="dialog-close" type="button" aria-label="Cerrar">×</button>
-    </div>
+    <div class="dialog-head"><div><span class="card-label">COMBUSTIBLE</span><h3>Configurar referencia</h3></div><button id="closeFuelSettings" class="dialog-close" type="button" aria-label="Cerrar">×</button></div>
     <p class="settings-help">Elige tu gasolinera habitual o usa tu ubicación. La selección se guarda solo en este dispositivo.</p>
-
     <label class="settings-label" for="stationSearch">Mi gasolinera</label>
     <input id="stationSearch" class="settings-input" type="search" autocomplete="off" placeholder="Nombre, localidad, dirección o código postal" />
-    <div id="stationSearchStatus" class="search-status"></div>
-    <div id="stationResults" class="station-results"></div>
-
+    <div id="stationSearchStatus" class="search-status"></div><div id="stationResults" class="station-results"></div>
     <div class="settings-divider"><span>o</span></div>
     <button id="useLocationBtn" class="secondary-action-btn" type="button">📍 Usar mi ubicación actual</button>
-
     <label class="settings-label" for="radiusSelect">Radio de comparación</label>
-    <select id="radiusSelect" class="settings-input">
-      <option value="5">5 km</option>
-      <option value="10" selected>10 km</option>
-      <option value="15">15 km</option>
-      <option value="25">25 km</option>
-    </select>
+    <select id="radiusSelect" class="settings-input"><option value="5">5 km</option><option value="10" selected>10 km</option><option value="15">15 km</option><option value="25">25 km</option></select>
     <p id="currentFuelSetting" class="current-setting"></p>
   </dialog>
 
-  <dialog id="iosInstallDialog">
-    <h3>Instalar Evolta en iPhone o iPad</h3>
-    <p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p>
-    <button id="closeDialog" type="button">Entendido</button>
-  </dialog>
+  <dialog id="iosInstallDialog"><h3>Instalar Evolta en iPhone o iPad</h3><p>En Safari toca <strong>Compartir</strong> y después <strong>Añadir a pantalla de inicio</strong>.</p><button id="closeDialog" type="button">Entendido</button></dialog>
 
-  <script src="/app.js?v=18" defer></script>
+  <script>
+    // GitHub Pages sirve la interfaz; el backend estable sigue en Vercel.
+    (() => {
+      const nativeFetch = window.fetch.bind(window);
+      const backend = 'https://combustible-luz-xljm.vercel.app';
+      window.fetch = (input, init) => {
+        if (typeof input === 'string' && input.startsWith('/api/')) return nativeFetch(backend + input, init);
+        if (input instanceof Request && new URL(input.url).pathname.startsWith('/api/')) {
+          const u = new URL(input.url); return nativeFetch(backend + u.pathname + u.search, init);
+        }
+        return nativeFetch(input, init);
+      };
+    })();
+  </script>
+  <script src="./app.js?v=pages21" defer></script>
 </body>
 </html>
