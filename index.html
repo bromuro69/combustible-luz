@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
+  <meta name="theme-color" content="#11110f" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Evolta" />
@@ -11,8 +11,9 @@
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png" />
-  <link rel="stylesheet" href="./styles.css?v=pages21" />
-  <link rel="stylesheet" href="./settings.css?v=pages21" />
+  <link rel="stylesheet" href="./styles.css?v=pages22" />
+  <link rel="stylesheet" href="./settings.css?v=pages22" />
+  <link rel="stylesheet" href="./evolta-theme-v22.css?v=pages22" />
 </head>
 <body>
   <main class="app-shell">
@@ -30,9 +31,18 @@
     </header>
 
     <nav class="tabs" aria-label="Secciones">
-      <button class="tab active" type="button" data-tab="fuel">⛽ Combustible</button>
-      <button class="tab" type="button" data-tab="electricity">⚡ Luz</button>
-      <button class="tab" type="button" data-tab="gas">🔥 Gas</button>
+      <button class="tab active" type="button" data-tab="fuel">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/><path d="M3 21h14"/><path d="M7 7h6"/><path d="M16 8h2l2 2v7a2 2 0 0 1-4 0v-5"/></svg>
+        <span>Combustible</span>
+      </button>
+      <button class="tab" type="button" data-tab="electricity">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m13 2-8 12h7l-1 8 8-12h-7z"/></svg>
+        <span>Luz</span>
+      </button>
+      <button class="tab" type="button" data-tab="gas">
+        <svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22c4.4 0 7-3 7-7 0-3.5-2-5.7-5-9-1.4 3-3 4.5-5 6.3C7 14 6 15.4 6 17.1 6 20 8.3 22 12 22Z"/><path d="M10.5 18.5c0-1.6 1.2-2.7 2.5-4.1 1.2 1.4 2.2 2.5 2.2 4 0 1.7-1.2 2.8-2.7 2.8-1.2 0-2-.8-2-2.7Z"/></svg>
+        <span>Gas</span>
+      </button>
     </nav>
 
     <section id="status" class="status hidden" role="status"></section>
@@ -115,6 +125,40 @@
       };
     })();
   </script>
-  <script src="./app.js?v=pages21" defer></script>
+  <script src="./app.js?v=pages22" defer></script>
+  <script>
+    // Convierte la distancia de cada estación barata en un acceso directo a navegación.
+    (() => {
+      const root = document.getElementById('cheapestFuel');
+      if (!root) return;
+      const enhanceDirections = () => {
+        root.querySelectorAll('.station-card').forEach(card => {
+          const pill = card.querySelector('.distance-pill');
+          if (!pill || pill.dataset.directionsReady === '1') return;
+          const name = card.querySelector('h3')?.textContent?.trim() || 'Gasolinera';
+          const address = card.querySelector('p')?.textContent?.trim() || '';
+          const destination = [name,address].filter(Boolean).join(', ');
+          const openDirections = () => {
+            const url = 'https://maps.apple.com/?daddr=' + encodeURIComponent(destination) + '&dirflg=d';
+            window.open(url,'_blank','noopener,noreferrer');
+          };
+          pill.dataset.directionsReady = '1';
+          pill.setAttribute('role','link');
+          pill.setAttribute('tabindex','0');
+          pill.setAttribute('aria-label','Cómo llegar a ' + destination);
+          pill.setAttribute('title','Abrir ruta hasta esta gasolinera');
+          pill.addEventListener('click',openDirections);
+          pill.addEventListener('keydown',e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              openDirections();
+            }
+          });
+        });
+      };
+      new MutationObserver(enhanceDirections).observe(root,{childList:true,subtree:true});
+      enhanceDirections();
+    })();
+  </script>
 </body>
 </html>
