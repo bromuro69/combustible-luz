@@ -1,0 +1,132 @@
+/* Evolta v22 · tema grafito cálido + ámbar, sin azul */
+:root{
+  --evolta-bg:#11110f;
+  --evolta-bg-2:#15140f;
+  --evolta-surface:#1a1a17;
+  --evolta-surface-2:#211f1a;
+  --evolta-line:rgba(243,240,232,.10);
+  --evolta-text:#f3f0e8;
+  --evolta-muted:#aaa69b;
+  --evolta-amber:#f2a33a;
+  --evolta-amber-deep:#d97a1e;
+  color:var(--evolta-text)!important;
+  background:var(--evolta-bg)!important;
+  --surface:rgba(26,26,23,.94)!important;
+  --surface-2:rgba(33,31,26,.94)!important;
+  --line:var(--evolta-line)!important;
+  --muted:var(--evolta-muted)!important;
+  --accent:var(--evolta-amber)!important;
+  --orange:var(--evolta-amber)!important;
+}
+html{background:var(--evolta-bg)!important}
+body{
+  color:var(--evolta-text)!important;
+  background:
+    radial-gradient(circle at 92% -8%,rgba(242,163,58,.13),transparent 34%),
+    radial-gradient(circle at 8% 34%,rgba(217,122,30,.06),transparent 30%),
+    linear-gradient(180deg,#11110f 0%,#0d0d0b 100%)!important;
+}
+a{color:#efb96f!important}
+.eyebrow,.card-label{color:var(--evolta-amber)!important}
+.subtle,.source-note,.footer-note,.unit,.legend,.badge{color:var(--evolta-muted)!important}
+
+/* Cabecera y controles */
+.icon-btn{
+  color:var(--evolta-text)!important;
+  background:#1b1a16!important;
+  border-color:var(--evolta-line)!important;
+  box-shadow:0 10px 28px rgba(0,0,0,.22)!important;
+}
+.tabs{
+  background:rgba(20,19,16,.94)!important;
+  border-color:var(--evolta-line)!important;
+  box-shadow:0 14px 34px rgba(0,0,0,.22)!important;
+}
+.tab{
+  color:#b8b3a8!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:7px!important;
+  transition:background .18s ease,color .18s ease,box-shadow .18s ease!important;
+}
+.tab-icon{width:17px;height:17px;display:block;flex:0 0 auto;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tab.active{
+  color:var(--evolta-text)!important;
+  background:#27241d!important;
+  box-shadow:inset 0 -2px 0 var(--evolta-amber),0 5px 16px rgba(0,0,0,.18)!important;
+}
+.tab.active .tab-icon{color:var(--evolta-amber)!important}
+
+/* Tarjetas y bloques */
+.card{
+  background:linear-gradient(155deg,rgba(31,30,26,.98),rgba(22,22,19,.98))!important;
+  border-color:var(--evolta-line)!important;
+  box-shadow:0 18px 50px rgba(0,0,0,.24)!important;
+}
+.fuel-price,.station-card,.top-item,.gas-card,.station-result{
+  background:#211f1a!important;
+  border-color:var(--evolta-line)!important;
+}
+.price-row{background:#191814!important}
+.price-row.current{
+  outline-color:rgba(242,163,58,.78)!important;
+  background:rgba(242,163,58,.08)!important;
+}
+.price-highlight-card.best-card{background:linear-gradient(155deg,rgba(26,55,35,.58),rgba(22,22,19,.98))!important}
+.price-highlight-card.worst-card{background:linear-gradient(155deg,rgba(69,30,26,.58),rgba(22,22,19,.98))!important}
+.gas-fixed strong,.gas-help strong{color:var(--evolta-text)!important}
+
+/* Ajustes: eliminar cualquier azul heredado */
+.settings-action-btn,.secondary-action-btn{
+  border-color:rgba(242,163,58,.28)!important;
+  background:rgba(242,163,58,.10)!important;
+  color:#f6d7ab!important;
+}
+.settings-action-btn:hover,.secondary-action-btn:hover{background:rgba(242,163,58,.16)!important}
+.location-reference-note{
+  background:rgba(242,163,58,.07)!important;
+  border-color:rgba(242,163,58,.17)!important;
+  color:#e8c89b!important;
+}
+.settings-input{
+  background:#191814!important;
+  color:var(--evolta-text)!important;
+  border-color:var(--evolta-line)!important;
+}
+.settings-input:focus{
+  border-color:rgba(242,163,58,.62)!important;
+  box-shadow:0 0 0 3px rgba(242,163,58,.10)!important;
+}
+.settings-label{color:#ded9ce!important}
+dialog{background:#171713!important;color:var(--evolta-text)!important;border-color:var(--evolta-line)!important}
+dialog::backdrop{background:rgba(8,8,7,.78)!important}
+.current-setting{background:rgba(243,240,232,.045)!important}
+
+/* Distancia = acceso directo a navegación */
+.distance-pill{
+  cursor:pointer!important;
+  user-select:none!important;
+  color:#f3d4a8!important;
+  background:rgba(242,163,58,.09)!important;
+  border-color:rgba(242,163,58,.24)!important;
+  transition:transform .15s ease,background .15s ease,border-color .15s ease!important;
+}
+.distance-pill::after{content:' · Cómo llegar →';font-weight:800;color:var(--evolta-amber)}
+.distance-pill:hover{background:rgba(242,163,58,.15)!important;border-color:rgba(242,163,58,.38)!important}
+.distance-pill:active{transform:scale(.98)}
+.distance-pill:focus-visible{outline:2px solid var(--evolta-amber);outline-offset:2px}
+
+.install-btn,dialog button{
+  background:var(--evolta-text)!important;
+  color:#15140f!important;
+  border-color:transparent!important;
+}
+.source-link{color:#efb96f!important}
+.status{background:rgba(86,34,28,.42)!important}
+
+@media(max-width:600px){
+  .tab{gap:5px!important}
+  .tab-icon{width:16px;height:16px}
+  .distance-pill{padding:6px 9px!important}
+}
